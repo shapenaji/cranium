@@ -38,7 +38,7 @@ introduction to the package,
 
 
 
-The `cranium` package functions similarly to the excellent [miniCRAN]{github.com/RevolutionAnalytics/miniCRAN} with a few exceptions:  
+The `cranium` package functions similarly to the excellent [miniCRAN](https://github.com/RevolutionAnalytics/miniCRAN) with a few exceptions:  
 
 * Multiple versions of a package can be stored in a repo, and users can install 
   versions by running `install.packages('<package_name>_<version_number>', repos = <your_repo>)`
