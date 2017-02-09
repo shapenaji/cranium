@@ -253,6 +253,8 @@ init_repo(repo = tempdir())</code></pre>
 </div>
 <div id="populating-a-repository" class="section level2">
 <h2>Populating a Repository</h2>
+<p>Installing another version will NOT overwrite the existing one,<br />
+the index updating function will manage this and create new install versions for the other versions. The repository will always link to the newest version however.</p>
 <pre class="r"><code>###################################################################
 # For the purposes of this vignette, I will be using the following
 # CRAN mirror, you should not need to set this
@@ -293,8 +295,10 @@ available.packages(contrib.url(file.path('file:/',tempdir())))</code></pre>
 <pre class="r"><code># Install from local
 install.packages('miniCRAN',file.path('file:/',tempdir()))
 
-# Install from a server running apache
-install.packages('miniCRAN', 'http://hostname/repolocation')</code></pre>
+# Install from a server (I have mine running off my shiny server)
+install.packages('miniCRAN', 'http://hostname/repolocation')
+
+# Install a version</code></pre>
 <p>Easiest of all, however, is to include this repository among your options in your <code>.Rprofile</code> or <code>Rprofile.site</code> file.</p>
 <pre class="r"><code>options(repos = c('http://hostname/repolocation',getOption('repos')))</code></pre>
 </div>

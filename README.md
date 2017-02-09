@@ -59,6 +59,11 @@ This will create the basic folder structure for your repo.
 
 ## Populating a Repository
 
+Installing another version will NOT overwrite the existing one,   
+the index updating function will manage this and create new install versions
+for the other versions. The repository will always link to the newest version
+however.
+
 
 
 
@@ -114,8 +119,10 @@ it just needs to be visible to them, whether on a network drive or on a webserve
 # Install from local
 install.packages('miniCRAN',file.path('file:/',tempdir()))
 
-# Install from a server running apache
+# Install from a server (I have mine running off my shiny server)
 install.packages('miniCRAN', 'http://hostname/repolocation')
+
+# Install a version
 ```
 
 Easiest of all, however, is to include this repository among your options
