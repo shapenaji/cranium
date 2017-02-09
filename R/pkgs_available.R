@@ -1,4 +1,4 @@
-#' Checks packages stored at location
+#' Checks packages stored at location, wrapper around available.packages from utils
 #'
 #' @param repo a local or external location, relative and absolute paths accepted
 #'

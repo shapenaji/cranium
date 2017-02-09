@@ -5,5 +5,12 @@
 #' @return NULL
 #' @export
 init_repo <- function(repo) {
-  dir.create(contrib.url(repo, type = 'source'),recursive = TRUE)
+  tmp <- dir.create(contrib.url(repo, type = 'source'),recursive = TRUE)
+  
+  # If creation was successful, set repo directory to initialized repo
+  if(tmp) {
+    message('Repository successfully initialized')
+    message(sprintf('Setting repo to: %s', repo))
+    set_repo_location(repo)
+  }
 }

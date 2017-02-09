@@ -1,0 +1,16 @@
+cranium v0.2.0 (Release date: 2017-2-08)
+==============
+
+Changes:
+* Changes to argument names in install_package_to_repo.R, 
+'destdir' has been changed to 'repo', to make the function less misleading,
+updated documentation. 
+* init_repo now lets us know what it's done. 
+Hopefully the other children will learn from its fine example.
+* Adjusted fedora.
+
+cranium v0.1.0 (Release date: 2017-2-08)
+==============
+
+Changes:
+* Initial Release, Documentation Spotty
