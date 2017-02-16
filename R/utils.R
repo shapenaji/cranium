@@ -66,3 +66,31 @@ check_base_address <- function(x,url) {
   m = nchar(url)
   substr(x,1,m) == url
 }
+
+# Sets attribute, not by reference
+addAttr <- function(x, name, value) {
+  data.table::setattr(x, name, c(attr(x,name,exact = TRUE), value))
+}
+
+# Checks if it is a git address
+is_git <- function(x) {
+  substr(x, y <- nchar(x) - 3, y + 3) == '.git'
+}
+
+# Defines intended location
+classer <- function(x) {
+  x <-  copy(x)
+  # Check ends
+  if(is_git(x)) addAttr(x, 'class', 'git')
+  
+  # Check known addresses
+  if(check_base_address(x, 'https://github.com')) addAttr(x, 'class', 'github')
+  
+  # Check protocols
+  if(check_base_address(x, 'https://') | 
+     check_base_address(x, 'http://')  |
+     check_base_address(x, 'ftp://')) addAttr(x, 'class', 'web')
+  else addAttr(x, 'class', 'local')
+  x
+}
+
