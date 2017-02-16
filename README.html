@@ -250,11 +250,12 @@ or a private repository, but a private server running apache may be recommended.
 init_repo(repo = tempdir())</code></pre>
 <p>That’s it!</p>
 <p>This will create the basic folder structure for your repo.</p>
+<p>For my usecase, I started up apache2 on Ubuntu, then initiated the repo in /var/www/html/CRAN_breeze</p>
 </div>
 <div id="populating-a-repository" class="section level2">
 <h2>Populating a Repository</h2>
 <p>Installing another version will NOT overwrite the existing one,<br />
-the index updating function will manage this and create new install versions for the other versions. The repository will always link to the newest version however.</p>
+the index updating function will manage this and create new install versions for the other versions. The repository will always link to the newest version <strong>by default</strong>, but older versions can be installed by adding the suffix: <code>_&lt;version&gt;</code>.</p>
 <pre class="r"><code>###################################################################
 # For the purposes of this vignette, I will be using the following
 # CRAN mirror, you should not need to set this
@@ -278,10 +279,10 @@ install_package_to_repo(pkg = 'miniCRAN',
 install_package_to_repo(pkg = 'miniCRAN')
 
 # We can also install directly from git (It will prompt you for your username/pw)
-# install_package_to_repo('https://path/to/package.git')
+install_package_to_repo('https://path/to/package.git')
 
 # Or from a local directory
-# install_package_to_repo('path/to/directory', repos = NULL)</code></pre>
+install_package_to_repo('path/to/package', repos = NULL)</code></pre>
 </div>
 <div id="checking-the-repository" class="section level2">
 <h2>Checking the repository</h2>
@@ -298,9 +299,20 @@ install.packages('miniCRAN',file.path('file:/',tempdir()))
 # Install from a server (I have mine running off my shiny server)
 install.packages('miniCRAN', 'http://hostname/repolocation')
 
-# Install a version</code></pre>
+# Install a version:
+# The Following will error unless the two above packages have different versions,
+# we only store alternate versions when there are multiple copies of the file in the repo)
+install.packages('miniCRAN_0.2.7', 'http://hostname/repolocation')</code></pre>
 <p>Easiest of all, however, is to include this repository among your options in your <code>.Rprofile</code> or <code>Rprofile.site</code> file.</p>
-<pre class="r"><code>options(repos = c('http://hostname/repolocation',getOption('repos')))</code></pre>
+<pre class="r"><code># Add to .RProfile
+local({
+    repos &lt;- getOption(&quot;repos&quot;)
+    # Replace your repo address here
+    repos[&quot;Internal_Repo&quot;] &lt;- &quot;http://0.0.0.0/reponame&quot;
+    repos[&quot;CRAN_Rstudio&quot;] &lt;- &quot;https://cran.rstudio.com/&quot;
+    repos[&quot;CRAN_rproject&quot;] &lt;- &quot;https://cloud.r-project.org/&quot;
+    options(repos = repos)
+})</code></pre>
 </div>
 
 

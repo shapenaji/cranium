@@ -56,13 +56,17 @@ That's it!
 
 This will create the basic folder structure for your repo.
 
+For my usecase, I started up apache2 on Ubuntu, then initiated the repo 
+in /var/www/html/CRAN_breeze
+
 
 ## Populating a Repository
 
 Installing another version will NOT overwrite the existing one,   
 the index updating function will manage this and create new install versions
-for the other versions. The repository will always link to the newest version
-however.
+for the other versions. The repository will always link to the newest version 
+**by default**, but older versions can be installed by adding the suffix:
+`_<version>`.
 
 
 
@@ -92,10 +96,10 @@ install_package_to_repo(pkg = 'miniCRAN',
 install_package_to_repo(pkg = 'miniCRAN')
 
 # We can also install directly from git (It will prompt you for your username/pw)
-# install_package_to_repo('https://path/to/package.git')
+install_package_to_repo('https://path/to/package.git')
 
 # Or from a local directory
-# install_package_to_repo('path/to/directory', repos = NULL)
+install_package_to_repo('path/to/package', repos = NULL)
 ```
 
 
@@ -122,7 +126,10 @@ install.packages('miniCRAN',file.path('file:/',tempdir()))
 # Install from a server (I have mine running off my shiny server)
 install.packages('miniCRAN', 'http://hostname/repolocation')
 
-# Install a version
+# Install a version:
+# The Following will error unless the two above packages have different versions,
+# we only store alternate versions when there are multiple copies of the file in the repo)
+install.packages('miniCRAN_0.2.7', 'http://hostname/repolocation')
 ```
 
 Easiest of all, however, is to include this repository among your options
@@ -130,5 +137,13 @@ in your `.Rprofile` or `Rprofile.site` file.
 
 
 ```r
-options(repos = c('http://hostname/repolocation',getOption('repos')))
+# Add to .RProfile
+local({
+    repos <- getOption("repos")
+    # Replace your repo address here
+    repos["Internal_Repo"] <- "http://0.0.0.0/reponame"
+    repos["CRAN_Rstudio"] <- "https://cran.rstudio.com/"
+    repos["CRAN_rproject"] <- "https://cloud.r-project.org/"
+    options(repos = repos)
+})
 ```
