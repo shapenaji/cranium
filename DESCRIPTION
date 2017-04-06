@@ -1,7 +1,7 @@
 Package: cranium
 Type: Package
 Title: Version-Controlled Package Repositories (Package Version and R Version)
-Version: 0.2.0
+Version: 0.3.0
 Author: Nicholas Jhirad [cre, aut]
 Maintainer: Nicholas Jhirad <lostnfound@gmail.com>
 Description: Creates a version-controlled local package repository on a server
@@ -11,4 +11,4 @@ Suggests: git2r, httr, openssl
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

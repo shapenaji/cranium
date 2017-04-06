@@ -12,4 +12,3 @@ init_repo(repo)
 \description{
 Initializes a new repo with the given name in the given location
 }
-

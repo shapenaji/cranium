@@ -18,4 +18,3 @@ Extract descriptions from a repository
 \examples{
 repo_descriptions()
 }
-

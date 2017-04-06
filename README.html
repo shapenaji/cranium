@@ -225,8 +225,8 @@ you may want your own stable working repository for your applications</p>
 <p>The cranium package aims to make creating/populating/maintaining a private repository<br />
 quick and painless, while storing older versions of packages that can be requested on demand.</p>
 </div>
-<div id="setup-your-repo" class="section level2">
-<h2>Setup your Repo</h2>
+<div id="package-details" class="section level2">
+<h2>Package Details</h2>
 <p>The package depends on:</p>
 <ul>
 <li><code>data.table</code> version &gt;= 1.10</li>
@@ -239,18 +239,19 @@ quick and painless, while storing older versions of packages that can be request
 <li><code>httr</code> for checking sources</li>
 <li><code>openssl</code> for hashes and password entry</li>
 </ul>
-<p>It requires no installation for users, in order to get the benefits of version control<br />
-or a private repository, but a private server running apache may be recommended.</p>
+<p>It requires no installation for users.</p>
+<p>but a private server running apache may be recommended.</p>
 </div>
 <div id="creating-a-repository" class="section level2">
 <h2>Creating a Repository</h2>
 <pre class="r"><code>library(cranium)
 
 # For the purposes of this vignette, we'll use a temporary dir
+# But this is intended to be something viewable to a team,
 init_repo(repo = tempdir())</code></pre>
 <p>That’s it!</p>
 <p>This will create the basic folder structure for your repo.</p>
-<p>For my usecase, I started up apache2 on Ubuntu, then initiated the repo in /var/www/html/CRAN_breeze</p>
+<p>For my usecase, I started a web-server, and deployed the repository to my live directory.</p>
 </div>
 <div id="populating-a-repository" class="section level2">
 <h2>Populating a Repository</h2>
@@ -278,16 +279,21 @@ install_package_to_repo(pkg = 'miniCRAN',
 ###################################################################
 install_package_to_repo(pkg = 'miniCRAN')
 
-# We can also install directly from git (It will prompt you for your username/pw)
+###################################################################
+# We can also install directly from git 
+# (It will prompt you for your username/pw)
+###################################################################
 install_package_to_repo('https://path/to/package.git')
 
-# Or from a local directory
-install_package_to_repo('path/to/package', repos = NULL)</code></pre>
+###################################################################
+# Or we can install from a local directory
+###################################################################
+install_package_to_repo('path/to/package.tar.gz', repos = NULL)</code></pre>
 </div>
 <div id="checking-the-repository" class="section level2">
 <h2>Checking the repository</h2>
 <pre class="r"><code># We can use the available.packages function from utils
-# to browse this repo
+# to browse repos
 available.packages(contrib.url(file.path('file:/',tempdir())))</code></pre>
 </div>
 <div id="using-the-repository" class="section level2">

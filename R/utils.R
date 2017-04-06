@@ -3,18 +3,18 @@
 .cranium[['package_fields']] <- c("Package", "Version", "Priority", "Depends", "Imports",
                                   "LinkingTo", "Suggests", "Enhances", "License", "License_is_FOSS",
                                   "License_restricts_use", "OS_type", "Archs", "MD5sum", "NeedsCompilation",
-                                  "Path")
+                                  "Path",'Repository')
 
 .cranium[['repo']] <- NULL
 
-#' set repo location
+#' set repo location (normalizes path)
 #'
 #' @param x a relative filepath
 #'
 #' @return the value of x (invisible)
 #' @export
 set_repo_location <- function(x) {
-  .cranium[['repo']] <- x
+  .cranium[['repo']] <- normalizePath(x)
   invisible(.cranium[['repo']])
 }
 
@@ -24,7 +24,7 @@ set_repo_location <- function(x) {
 #' @return the filepath of the current repo
 #' @export
 get_repo_location <- function() {
-  if(is.null(.cranium[['repo']])) set_repo_location(readline('No Repo Location Set:\n'))
+  if(is.null(.cranium[['repo']])) stop('No repo location set, use set_repo_location.')
   .cranium[['repo']]
 }
 
@@ -67,19 +67,22 @@ check_base_address <- function(x,url) {
   substr(x,1,m) == url
 }
 
-# Sets attribute, not by reference
+# Sets attribute, by reference
 addAttr <- function(x, name, value) {
   data.table::setattr(x, name, c(attr(x,name,exact = TRUE), value))
 }
 
-# Checks if it is a git address
+# Checks if is git
 is_git <- function(x) {
   substr(x, y <- nchar(x) - 3, y + 3) == '.git'
 }
 
+
+
 # Defines intended location
-classer <- function(x) {
-  x <-  copy(x)
+addr_class <- function(x) {
+  x <- copy(x)
+  
   # Check ends
   if(is_git(x)) addAttr(x, 'class', 'git')
   
@@ -87,10 +90,10 @@ classer <- function(x) {
   if(check_base_address(x, 'https://github.com')) addAttr(x, 'class', 'github')
   
   # Check protocols
-  if(check_base_address(x, 'https://') | 
-     check_base_address(x, 'http://')  |
+  if(check_base_address(x, 'https://')) addAttr(x, 'class', c('web','ssl'))
+  if(check_base_address(x, 'http://')  |
      check_base_address(x, 'ftp://')) addAttr(x, 'class', 'web')
-  else addAttr(x, 'class', 'local')
+  if(!inherits(x, 'web')) addAttr(x, 'class', 'local')
   x
 }
 

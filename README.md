@@ -25,7 +25,7 @@ you may want your own stable working repository for your applications
 The cranium package aims to make creating/populating/maintaining a private repository  
 quick and painless, while storing older versions of packages that can be requested on demand.  
 
-## Setup your Repo
+## Package Details
 
 The package depends on:
  
@@ -39,8 +39,9 @@ the package suggests:
  * `httr`      for checking sources
  * `openssl`   for hashes and password entry
 
-It requires no installation for users, in order to get the benefits of version control  
-or a private repository, but a private server running apache may be recommended.  
+It requires no installation for users.
+
+but a private server running apache may be recommended.  
 
 ## Creating a Repository
 
@@ -49,6 +50,7 @@ or a private repository, but a private server running apache may be recommended.
 library(cranium)
 
 # For the purposes of this vignette, we'll use a temporary dir
+# But this is intended to be something viewable to a team,
 init_repo(repo = tempdir())
 ```
 
@@ -56,8 +58,8 @@ That's it!
 
 This will create the basic folder structure for your repo.
 
-For my usecase, I started up apache2 on Ubuntu, then initiated the repo 
-in /var/www/html/CRAN_breeze
+For my usecase, I started a web-server, and deployed the repository to my
+live directory.
 
 
 ## Populating a Repository
@@ -95,11 +97,16 @@ install_package_to_repo(pkg = 'miniCRAN',
 ###################################################################
 install_package_to_repo(pkg = 'miniCRAN')
 
-# We can also install directly from git (It will prompt you for your username/pw)
+###################################################################
+# We can also install directly from git 
+# (It will prompt you for your username/pw)
+###################################################################
 install_package_to_repo('https://path/to/package.git')
 
-# Or from a local directory
-install_package_to_repo('path/to/package', repos = NULL)
+###################################################################
+# Or we can install from a local directory
+###################################################################
+install_package_to_repo('path/to/package.tar.gz', repos = NULL)
 ```
 
 
@@ -108,7 +115,7 @@ install_package_to_repo('path/to/package', repos = NULL)
 
 ```r
 # We can use the available.packages function from utils
-# to browse this repo
+# to browse repos
 available.packages(contrib.url(file.path('file:/',tempdir())))
 ```
 

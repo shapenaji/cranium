@@ -2,7 +2,7 @@
 % Please edit documentation in R/pkgs_available.R
 \name{pkgs_available}
 \alias{pkgs_available}
-\title{Checks packages stored at location}
+\title{Checks packages stored at location, wrapper around available.packages from utils}
 \usage{
 pkgs_available(repo)
 }
@@ -13,7 +13,7 @@ pkgs_available(repo)
 a Descriptions table
 }
 \description{
-Checks packages stored at location
+Checks packages stored at location, wrapper around available.packages from utils
 }
 \examples{
 
@@ -22,4 +22,3 @@ pkgs_available(getOption('repos'))
 
 
 }
-

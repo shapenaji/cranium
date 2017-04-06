@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{set_repo_location}
 \alias{set_repo_location}
-\title{set repo location}
+\title{set repo location (normalizes path)}
 \usage{
 set_repo_location(x)
 }
@@ -13,6 +13,5 @@ set_repo_location(x)
 the value of x (invisible)
 }
 \description{
-set repo location
+set repo location (normalizes path)
 }
-

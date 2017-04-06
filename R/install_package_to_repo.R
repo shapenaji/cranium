@@ -57,6 +57,7 @@ install_package_to_repo <- function(pkg,
         # If they're sure....
         message('"https://" not detected, username:password will be sent in plaintext!')
         ans <- readline('Are you sure you want to do this (this is not recommended)? (N/y): ')
+        
         if(!ans %in% c('Y','y','Yes','yes')) stop('Stopping.')
 
         message('Starting Git Pull')
@@ -77,7 +78,7 @@ install_package_to_repo <- function(pkg,
       warning('git2r AND/OR httr is missing, cannot install from git repos')
     } else {
       # Check location to see if file is present
-      #browser()
+      
       gitloc <- sprintf('%s%s.git',repos[isGithub], pkg)
       if(httr::HEAD(gitloc)$status_code == 200) {
         # If so, clone and build

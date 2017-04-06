@@ -18,4 +18,3 @@ Extract description from source package(s)
 \examples{
 extract_description('test.tar.gz')
 }
-

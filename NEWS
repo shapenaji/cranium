@@ -1,3 +1,11 @@
+cranium v0.3.0 (Release date: 2017-2-08)
+==============
+
+Changes:
+* modify_description modifies repo descriptions
+* intended to work better with packrat (A LA RStudio Connect)
+* Took off fedora
+
 cranium v0.2.0 (Release date: 2017-2-08)
 ==============
 

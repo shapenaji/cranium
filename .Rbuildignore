@@ -4,3 +4,5 @@ css/
 \.gitignore
 \.git/
 ^README
+^\.Rprofile
+^\.Rhistory

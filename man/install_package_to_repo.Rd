@@ -5,14 +5,30 @@
 \title{Installs package from repo/github into repository (Not Vectorized)}
 \usage{
 install_package_to_repo(pkg, repos = getOption("repos"),
-  destdir = get_repo_location(), type = "source")
+  repo = get_repo_location(), type = "source")
 }
 \arguments{
-\item{pkg}{a package, if using a cranium repository and multiple packages are available, versions can be selected with `_version`}
+\item{pkg}{Options:
+\enumerate{
+ \item a package name, (Example: 'cranium'), if using a cranium repository and multiple packages are available, versions can be selected with `_version`,
+ \item a path to a package, (Example: '~/Downloads/cranium_0.2.0.tar.gz'), requires repos = NULL 
+}}
 
-\item{destdir}{the directory of the repository (NOT the contrib.url)}
+\item{repos}{Accepts several options:
+\itemize{
+\item Repos: (DEFAULT: getOption('repos')) A vector of repos that will be searched for the package
+\item Github: An address of the form: 'https://github/<accountname>/'
+\item Secure Gits: An address of the form: 'https://<path>/<to>/<repository>.git'
+\item Insecure Gits: An address of the form: 'http://<path>/<to>/<repository>.git' 
+With a STRONG warning that you should not be authenticating over http:, 
+but we understand that some networks aren't perfect. 
+\item Local Pkgs: NULL
+}
+a list of repos that will be checked for the package (getOption('repos')) OR an  OR a '}
 
-\item{repo}{the repo to install from, if this is at a github location, install github will be used}
+\item{repo}{by default, the value in get_repo_location(), but this can be any repository directory}
+
+\item{type}{Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.}
 }
 \value{
 A Descriptions Table of the packages made available
@@ -21,7 +37,6 @@ A Descriptions Table of the packages made available
 Installs package from repo/github into repository (Not Vectorized)
 }
 \examples{
-# Install to default apache location
+# Install from CRAN repositories to default apache2 location
 install_package_to_repo('data.table',destdir = '/var/www/html/')
 }
-

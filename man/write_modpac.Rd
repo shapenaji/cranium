@@ -17,4 +17,3 @@ A Descriptions Table of the packages made available
 \description{
 Writes modified PACKAGES files to allow install.packages to access versions
 }
-
