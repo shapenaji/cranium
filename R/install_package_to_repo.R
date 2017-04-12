@@ -36,6 +36,11 @@ install_package_to_repo <- function(pkg,
   isGithub <- check_base_address(repos, 'https://github.com')
   isGit <- grepl( '\\.git$', pkg)
   isInternal <- is.null(repos)
+  
+  on.exit({
+    message(sprintf('Removing Build directory'))
+    unlink(fileloc, recursive = TRUE)
+  })
 
   # Support building from non-github gits
   if(isGit) {
@@ -63,7 +68,7 @@ install_package_to_repo <- function(pkg,
           modify_description('Repository', repo_name, fileloc)
         }
         
-        message(sprintf('Removing Build directory'))
+        ç
         unlink(fileloc, recursive = TRUE)
       } else {
         # Check if they're sure....
@@ -81,16 +86,13 @@ install_package_to_repo <- function(pkg,
         
         # Build in directory
         message(sprintf('Building in Directory'))
-        devtools::build(fileloc)
+        targz <- devtools::build(fileloc)
         
         # if repo_name set, rebuild
         if(!is.null(repo_name)) {
           message('Adding repo_name and rebuilding')
-          modify_description('Repository', repo_name, fileloc)
+          modify_description('Repository', repo_name, targz)
         }
-        
-        message(sprintf('Removing Build directory'))
-        unlink(fileloc, recursive = TRUE)
       }
     }
 
@@ -112,17 +114,16 @@ install_package_to_repo <- function(pkg,
         message('Starting Git Pull')
         git2r::clone(gitloc, fileloc)
         message(sprintf('Building in Directory'))
-        devtools::build(fileloc)
+        targz <- devtools::build(fileloc)
         
         # if repo_name set, rebuild
         if(!is.null(repo_name)) {
           message('Adding repo_name and rebuilding')
-          modify_description('Repository', repo_name, fileloc)
+          modify_description('Repository', repo_name, targz)
         }
-        
-        message(sprintf('Removing Build directory'))
 
-        unlink(fileloc, recursive = TRUE)
+        
+        
       } else {
         warning(sprintf('%s not found at %s',pkg, repos[isGithub]))
       }
@@ -144,6 +145,7 @@ install_package_to_repo <- function(pkg,
                                repos = repos,
                                type = type)
     
+    # Modify Description to use Repo
     if(!is.null(repo_name)) {
       modify_description('Repository', repo_name, out[,2])
     }
