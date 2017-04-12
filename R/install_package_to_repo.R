@@ -18,7 +18,7 @@
 #' a list of repos that will be checked for the package (getOption('repos')) OR an  OR a '
 #' @param repo by default, the value in get_repo_location(), but this can be any repository directory
 #' @param type Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.
-#' @param repo_name A name to give the repo, will be used by packrat to search for sources in user's options file
+#' @param repo_name default: NULL, A name to give the repo, will be used by packrat to search for sources in user's options file
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import utils
@@ -31,16 +31,21 @@ install_package_to_repo <- function(pkg,
                                     repos = getOption('repos'),
                                     repo = get_repo_location(),
                                     type = 'source',
-                                    repo_name = NULL) {
+                                    repo_name = get_repo_name()) {
 
-  isGithub <- check_base_address(repos, 'https://github.com')
-  isGit <- grepl( '\\.git$', pkg)
-  isInternal <- is.null(repos)
-  
+  # Fileloc is used for temp files
+  # We automatically remove this on exit
+  fileloc <- NULL
   on.exit({
     message(sprintf('Removing Build directory'))
     unlink(fileloc, recursive = TRUE)
   })
+  
+  isGithub <- check_base_address(repos, 'https://github.com')
+  isGit <- grepl( '\\.git$', pkg)
+  isInternal <- is.null(repos)
+  
+  
 
   # Support building from non-github gits
   if(isGit) {
@@ -60,15 +65,14 @@ install_package_to_repo <- function(pkg,
         
         # Build in directory
         message(sprintf('Building in Directory'))
-        devtools::build(fileloc)
+        targz <- devtools::build(fileloc)
         
         # if repo_name set, rebuild
         if(!is.null(repo_name)) {
           message('Adding repo_name and rebuilding')
-          modify_description('Repository', repo_name, fileloc)
+          modify_description('Repository', repo_name, targz)
         }
         
-        ç
         unlink(fileloc, recursive = TRUE)
       } else {
         # Check if they're sure....

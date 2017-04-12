@@ -6,7 +6,7 @@
                                   "Path",'Repository')
 
 .cranium[['repo']] <- NULL
-
+.cranium[['repo_name']] <- NULL
 #' set repo location (normalizes path)
 #'
 #' @param x a relative filepath
@@ -18,7 +18,6 @@ set_repo_location <- function(x) {
   invisible(.cranium[['repo']])
 }
 
-
 #' Get Currently set repo location
 #'
 #' @return the filepath of the current repo
@@ -28,7 +27,26 @@ get_repo_location <- function() {
   .cranium[['repo']]
 }
 
-# Get the base directory of a path
+#' set repo name (optional)
+#'
+#' @param x a name for the repo, this will be used by packrat when searching for a repository
+#'
+#' @return the value of x (invisible)
+#' @export
+set_repo_name <- function(x) {
+  .cranium[['repo_name']] <- x
+  invisible(.cranium[['repo_name']])
+}
+
+#' get repo name (optional)
+#'
+#' @return the name of the current repo
+#' @export
+get_repo_name <- function() {
+  .cranium[['repo_name']]
+}
+
+# Get the base directory of a tarball
 getbasedir <- function(x) {
   strsplit(untar(x, list = TRUE)[[1]],'/')[[1]][1]
 }

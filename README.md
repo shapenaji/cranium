@@ -66,47 +66,78 @@ live directory.
 
 Installing another version will NOT overwrite the existing one,   
 the index updating function will manage this and create new install versions
-for the other versions. The repository will always link to the newest version 
-**by default**, but older versions can be installed by adding the suffix:
-`_<version>`.
+for the other versions. 
+
+The repository will always link the base package name to the newest version 
+by default, but if there are multiple versions, these are available via
+
+`<package>_<version>`
 
 
 
+
+We always start by setting our repo location.
+
+### Set Repo Location First
 
 
 ```r
-###################################################################
-# For the purposes of this vignette, I will be using the following
-# CRAN mirror, you should not need to set this
-options(repos = 'https://cloud.r-project.org/')
-
-###################################################################
-# We can forceably set our repo location:
-###################################################################
 set_repo_location(tempdir())
+```
 
-###################################################################
-# Let's add the miniCRAN package
-###################################################################
+### Install from github:
+
+
+```r
 install_package_to_repo(pkg = 'miniCRAN', 
                         repos = 'https://github.com/RevolutionAnalytics/')
+```
 
-###################################################################
-# And the version from CRAN to compare
-# miniCRAN
-###################################################################
+### Install the CRAN version:
+
+
+```r
 install_package_to_repo(pkg = 'miniCRAN')
+```
 
-###################################################################
-# We can also install directly from git 
-# (It will prompt you for your username/pw)
-###################################################################
+### Installing from git:
+
+
+```r
 install_package_to_repo('https://path/to/package.git')
+```
 
-###################################################################
-# Or we can install from a local directory
-###################################################################
+### Installing a local package:
+
+
+```r
 install_package_to_repo('path/to/package.tar.gz', repos = NULL)
+```
+
+### Install using repository "name" (for packrat/RStudio Connect)
+
+Or we can install using a Repository "name" (as of v0.4.1)
+
+packrat uses this name to lookup the repo location in installs to RStudio Connect
+
+(it will check getOption('repos')['REPO_NAME'])
+
+
+```r
+install_package_to_repo(pkg = 'path/to/package.tar.gz', 
+                        repos = NULL, 
+                        repo_name = 'MyRepoName')
+```
+
+
+We can also set the repo name globally:
+
+
+```r
+set_repo_name('MyRepoName')
+
+# Everything gets installed with Repo "MyRepoName"
+install_package_to_repo(pkg = 'miniCRAN')
 ```
 
 
@@ -122,8 +153,8 @@ available.packages(contrib.url(file.path('file:/',tempdir())))
 
 ## Using the repository
 
-As said earlier, cranium requires no setup for your users, 
-it just needs to be visible to them, whether on a network drive or on a webserver.
+the cranium package does not need to be installed by your users.
+They only need to see the final product, the repo, whether on a network drive or on a webserver.
 
 
 ```r
@@ -139,7 +170,7 @@ install.packages('miniCRAN', 'http://hostname/repolocation')
 install.packages('miniCRAN_0.2.7', 'http://hostname/repolocation')
 ```
 
-Easiest of all, however, is to include this repository among your options
+Easiest of all, however, is to include this repository among your/their options
 in your `.Rprofile` or `Rprofile.site` file.
 
 
@@ -148,9 +179,28 @@ in your `.Rprofile` or `Rprofile.site` file.
 local({
     repos <- getOption("repos")
     # Replace your repo address here
-    repos["Internal_Repo"] <- "http://0.0.0.0/reponame"
-    repos["CRAN_Rstudio"] <- "https://cran.rstudio.com/"
-    repos["CRAN_rproject"] <- "https://cloud.r-project.org/"
+    repos["MyRepo"] <- "http://0.0.0.0/reponame"
+    repos["CRAN"] <- "@CRAN@"
+    options(pkgType = "source")
     options(repos = repos)
 })
+```
+
+## Modifying the repository
+
+We also include functions for maintaining the repository,
+
+`modify_descriptions` will adjust every description in the repository. 
+Adding the given field with the given value. This can be handy for setting Repository name
+
+`modify_description` can be used to modify a single tar.gz file
+
+**Note: Both functions rebuild packages. Make sure you modify under the desired R version.**
+
+
+```r
+set_repo_location('/var/www/html/mini_CRAN_Repo')
+
+# Set the repository for all packages to be the current repo_name
+modify_descriptions('Repository', get_repo_name())
 ```
