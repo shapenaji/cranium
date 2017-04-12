@@ -5,7 +5,7 @@
 \title{Installs package from repo/github into repository (Not Vectorized)}
 \usage{
 install_package_to_repo(pkg, repos = getOption("repos"),
-  repo = get_repo_location(), type = "source")
+  repo = get_repo_location(), type = "source", repo_name = NULL)
 }
 \arguments{
 \item{pkg}{Options:
@@ -29,6 +29,8 @@ a list of repos that will be checked for the package (getOption('repos')) OR an 
 \item{repo}{by default, the value in get_repo_location(), but this can be any repository directory}
 
 \item{type}{Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.}
+
+\item{repo_name}{A name to give the repo, will be used by packrat to search for sources in user's options file}
 }
 \value{
 A Descriptions Table of the packages made available

@@ -18,6 +18,7 @@
 #' a list of repos that will be checked for the package (getOption('repos')) OR an  OR a '
 #' @param repo by default, the value in get_repo_location(), but this can be any repository directory
 #' @param type Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.
+#' @param repo_name A name to give the repo, will be used by packrat to search for sources in user's options file
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import utils
@@ -29,7 +30,8 @@
 install_package_to_repo <- function(pkg,
                                     repos = getOption('repos'),
                                     repo = get_repo_location(),
-                                    type = 'source') {
+                                    type = 'source',
+                                    repo_name = NULL) {
 
   isGithub <- check_base_address(repos, 'https://github.com')
   isGit <- grepl( '\\.git$', pkg)
@@ -44,29 +46,49 @@ install_package_to_repo <- function(pkg,
       isSecure <- check_base_address(pkg,'https://')
       fileloc <- file.path(contrib.url(repo),basename(pkg))
       if(isSecure) {
+        # Pull from location
         message('Starting Git Pull')
         git2r::clone(pkg,
                      local_path = fileloc,
                      credentials = cred_user_pass(readline(prompt = 'Username: '),
                                                   openssl::askpass(prompt = 'Password: ')))
+        
+        # Build in directory
         message(sprintf('Building in Directory'))
         devtools::build(fileloc)
+        
+        # if repo_name set, rebuild
+        if(!is.null(repo_name)) {
+          message('Adding repo_name and rebuilding')
+          modify_description('Repository', repo_name, fileloc)
+        }
+        
         message(sprintf('Removing Build directory'))
         unlink(fileloc, recursive = TRUE)
       } else {
-        # If they're sure....
+        # Check if they're sure....
         message('"https://" not detected, username:password will be sent in plaintext!')
         ans <- readline('Are you sure you want to do this (this is not recommended)? (N/y): ')
         
         if(!ans %in% c('Y','y','Yes','yes')) stop('Stopping.')
-
+        
+        # Pull from location
         message('Starting Git Pull')
         git2r::clone(pkg,
                      local_path = fileloc,
                      credentials = cred_user_pass(readline(prompt = 'Username: '),
                                                   openssl::askpass(prompt = 'Password: ')))
+        
+        # Build in directory
         message(sprintf('Building in Directory'))
         devtools::build(fileloc)
+        
+        # if repo_name set, rebuild
+        if(!is.null(repo_name)) {
+          message('Adding repo_name and rebuilding')
+          modify_description('Repository', repo_name, fileloc)
+        }
+        
         message(sprintf('Removing Build directory'))
         unlink(fileloc, recursive = TRUE)
       }
@@ -91,6 +113,13 @@ install_package_to_repo <- function(pkg,
         git2r::clone(gitloc, fileloc)
         message(sprintf('Building in Directory'))
         devtools::build(fileloc)
+        
+        # if repo_name set, rebuild
+        if(!is.null(repo_name)) {
+          message('Adding repo_name and rebuilding')
+          modify_description('Repository', repo_name, fileloc)
+        }
+        
         message(sprintf('Removing Build directory'))
 
         unlink(fileloc, recursive = TRUE)
@@ -100,6 +129,10 @@ install_package_to_repo <- function(pkg,
     }
     # If package is internal, copy it from it's current location
   } else if(any(isInternal)) {
+    # Modify Description to use Repo
+    if(!is.null(repo_name)) {
+      modify_description('Repository', repo_name, pkg)
+    }
     # Copy file from original location to repo
     out <- file.copy(pkg, file.path(contrib.url(repo), basename(pkg)),
                      overwrite = TRUE)
@@ -110,6 +143,11 @@ install_package_to_repo <- function(pkg,
                                destdir = contrib.url(repo),
                                repos = repos,
                                type = type)
+    
+    if(!is.null(repo_name)) {
+      modify_description('Repository', repo_name, out[,2])
+    }
+    
     print(out)
   }
 
