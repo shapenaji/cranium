@@ -1,3 +1,11 @@
+cranium v0.4.0 (Release date: 2017-4-12)
+==============
+
+Changes:
+* repo_name supported in install_package_to_repo, can be used with packrat
+* modify_descriptions changes all descriptions in the repo.
+* modify_description changes a single package
+
 cranium v0.3.0 (Release date: 2017-2-08)
 ==============
 
