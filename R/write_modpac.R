@@ -1,7 +1,6 @@
 #' Writes modified PACKAGES files to allow install.packages to access versions
 #'
-#' @param repo Repository Directory
-#' @param loc visible location (External might be http://server/path/to/repo, internal might be file://path/to/repo)
+#' @param repo Repository Directory (by default, this uses the repo location set with "set_repo_location")
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import data.table
@@ -9,9 +8,17 @@
 write_modpac <- function(repo = get_repo_location()) {
 
 
+  # We write three versions of the PACKAGES file, two in dcf format, 
+  # one in native rds format
   out <- file(sprintf('%s/%s',contrib.url(repo), "PACKAGES"), "wt")
   outgz <- gzfile(sprintf('%s/%s',contrib.url(repo), "PACKAGES.gz"), "wt")
+  outrds <- sprintf('%s/%s',contrib.url(repo), "PACKAGES.rds")
 
+  # Close connections on exit
+  on.exit(close(out))
+  on.exit(close(outgz))
+  
+  # Extract all descriptions, load only confirmed package fields
   DESCs <- repo_descriptions(repo)
   cranDESCs <- DESCs[,mget(.cranium[['package_fields']], ifnotfound = NA)]
 
@@ -55,18 +62,19 @@ write_modpac <- function(repo = get_repo_location()) {
     #browser()
     desci <- desc[i, !(is.na(desc[i,]) | (desc[i,] == "")), drop = FALSE]
 
+    # Save a 
     write.dcf(desci, file = out)
-    # if (nzchar(path[i]))
-    #   cat("Path: ", path[i], "\n", sep = "", file = out)
     cat("\n", file = out)
+    
+    # Save a gz version
     write.dcf(desci, file = outgz)
-    # if (nzchar(path[i]))
-    #   cat("Path: ", path[i], "\n", sep = "", file = outgz)
     cat("\n", file = outgz)
+    
+    # as of R 3.4, we also save an rds version
+    saveRDS(desci, outrds)
   }
 
-  close(out)
-  close(outgz)
+  # Return descriptions, so we can see what's in there
   cranDESCs
 }
 
