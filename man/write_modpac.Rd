@@ -7,9 +7,7 @@
 write_modpac(repo = get_repo_location())
 }
 \arguments{
-\item{repo}{Repository Directory}
-
-\item{loc}{visible location (External might be http://server/path/to/repo, internal might be file://path/to/repo)}
+\item{repo}{Repository Directory (by default, this uses the repo location set with "set_repo_location")}
 }
 \value{
 A Descriptions Table of the packages made available

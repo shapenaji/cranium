@@ -5,6 +5,7 @@ Changes:
 * write_modpac now also writes a PACKAGES.rds file
 in line with R 3.4's install.packages
 * Github packages can now also be installed with the clone address
+* added getPass for better terminal handling of passwords.
 
 cranium v0.4.0 (Release date: 2017-4-12)
 ==============
