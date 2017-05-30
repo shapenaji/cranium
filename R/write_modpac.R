@@ -15,8 +15,11 @@ write_modpac <- function(repo = get_repo_location()) {
   outrds <- sprintf('%s/%s',contrib.url(repo), "PACKAGES.rds")
 
   # Close connections on exit
-  on.exit(close(out))
-  on.exit(close(outgz))
+  on.exit({
+    close(out)
+    close(outgz)
+  })
+  
   
   # Extract all descriptions, load only confirmed package fields
   DESCs <- repo_descriptions(repo)
@@ -71,9 +74,10 @@ write_modpac <- function(repo = get_repo_location()) {
     cat("\n", file = outgz)
     
     # as of R 3.4, we also save an rds version
-    saveRDS(desci, outrds)
+    
   }
 
+  saveRDS(desc, outrds)
   # Return descriptions, so we can see what's in there
   cranDESCs
 }
