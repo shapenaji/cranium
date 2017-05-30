@@ -132,10 +132,20 @@ install_package_to_repo <-
           
           # Pull from location
           message('Starting Git Pull')
-          git2r::clone(pkg,
-                       local_path = fileloc,
-                       credentials = cred_user_pass(readline(prompt = 'Username: '),
-                                                    getPass::getPass(prompt = 'Password: ')))
+          git2r::clone(
+            pkg,
+            local_path = fileloc,
+            credentials = 
+              cred_user_pass(
+                readline(prompt = 'Username: '),
+                if(require(getPass)) {
+                  getPass::getPass('Password: ', forcemask = TRUE)
+                } else {
+                  warning('openssl does not mask terminal password entry!\n We recommend you install getPass')
+                  openssl::askpass('Password: ')
+                }
+              )
+          )
           
           # Build in directory
           message(sprintf('Building in Directory'))
