@@ -3,7 +3,7 @@
 .cranium[['package_fields']] <- c("Package", "Version", "Priority", "Depends", "Imports",
                                   "LinkingTo", "Suggests", "Enhances", "License", "License_is_FOSS",
                                   "License_restricts_use", "OS_type", "Archs", "MD5sum", "NeedsCompilation",
-                                  "Path",'Repository')
+                                  "Path",'Repository','Header')
 
 .cranium[['repo']] <- NULL
 .cranium[['repo_name']] <- NULL
