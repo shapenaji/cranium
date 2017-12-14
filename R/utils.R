@@ -7,6 +7,30 @@
 
 .cranium[['repo']] <- NULL
 .cranium[['repo_name']] <- NULL
+
+#' Modify Default Fields in PACKAGES file
+#'
+#' @param fields fields to add (must be present in package descriptions) 
+#' @param append should this be appended to existing fields
+#' @return NULL
+#' @export
+set_packages_fields <- function(fields, append = TRUE) {
+  if(append) {
+    .cranium[['package_fields']] <- c(.cranium[['package_fields']], fields)
+  } else {
+    .cranium[['package_fields']] <- fields
+  }
+  message('Fields displayed: ', paste(.cranium[['package_fields']], collapse = '\n'))
+}
+
+#' Get Current package fields
+#'
+#' @return current fields used in the PACKAGES file
+#' @export
+get_packages_fields <- function() {
+  .cranium[['package_fields']]
+}
+
 #' set repo location (normalizes path)
 #'
 #' @param x a relative filepath
