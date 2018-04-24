@@ -8,6 +8,7 @@ Description: Creates a version-controlled local package repository on a server
     does not require any special client-side software to access packages.
 Imports:
     data.table,
+    devtools,
     tools,
     utils
 Suggests: git2r, httr, openssl, getPass
