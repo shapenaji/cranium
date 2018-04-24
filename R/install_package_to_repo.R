@@ -23,7 +23,6 @@
 #' @return A Descriptions Table of the packages made available
 #' @import utils
 #' @import tools
-#' @import getPass
 #' @export
 #' @examples
 #' # Install from CRAN repositories to default apache2 location
@@ -103,7 +102,7 @@ install_package_to_repo <-
                        credentials = 
                          cred_user_pass(
                            readline(prompt = 'Username: '),
-                           if(require(getPass)) {
+                           if(requireNamespace("getPass", quietly = TRUE)) {
                              getPass::getPass('Password: ', forcemask = TRUE)
                            } else {
                              warning('openssl does not mask terminal password entry!\n We recommend you install getPass')
@@ -138,7 +137,7 @@ install_package_to_repo <-
             credentials = 
               cred_user_pass(
                 readline(prompt = 'Username: '),
-                if(require(getPass)) {
+                if(requireNamespace("getPass", quietly = TRUE)) {
                   getPass::getPass('Password: ', forcemask = TRUE)
                 } else {
                   warning('openssl does not mask terminal password entry!\n We recommend you install getPass')
