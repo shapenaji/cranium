@@ -6,7 +6,11 @@ Author: Nicholas Jhirad [cre, aut]
 Maintainer: Nicholas Jhirad <lostnfound@gmail.com>
 Description: Creates a version-controlled local package repository on a server
     does not require any special client-side software to access packages.
-Depends: tools, utils, data.table
+Imports:
+    data.table,
+    devtools,
+    tools,
+    utils
 Suggests: git2r, httr, openssl, getPass
 License: GPL-3
 Encoding: UTF-8

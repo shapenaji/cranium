@@ -155,8 +155,6 @@ modify_description <- function(field, value, file) {
 #' @examples
 #' repo_descriptions()
 repo_descriptions <- function(repo = get_repo_location()) {
-  require(data.table)
-
   # Location of source files
   rurl <- contrib.url(repo)
 
