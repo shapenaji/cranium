@@ -1,11 +1,13 @@
 #' Writes modified PACKAGES files to allow install.packages to access versions
 #'
 #' @param repo Repository Directory (by default, this uses the repo location set with "set_repo_location")
+#' @param fields A vector of DESCRIPTION file fields to use in the PACKAGES file.
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import data.table
 #' @export
-write_modpac <- function(repo = get_repo_location()) {
+write_modpac <- function(repo = get_repo_location(),
+                         fields = get_packages_fields()) {
 
 
   # We write three versions of the PACKAGES file, two in dcf format, 
@@ -22,8 +24,7 @@ write_modpac <- function(repo = get_repo_location()) {
   
   
   # Extract all descriptions, load only confirmed package fields
-  DESCs <- repo_descriptions(repo)
-  cranDESCs <- DESCs[,mget(.cranium[['package_fields']], ifnotfound = NA)]
+  cranDESCs <- repo_descriptions(repo, fields = fields)
 
   cranDESCs <- cranDESCs[,if(.N > 1) rbind(.SD,.SD[is_max_ver(Version)]) else .SD,
                          by = Package]

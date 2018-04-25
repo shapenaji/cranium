@@ -19,6 +19,7 @@
 #' @param repo by default, the value in get_repo_location(), but this can be any repository directory
 #' @param type Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.
 #' @param repo_name default: NULL, A name to give the repo, will be used by packrat to search for sources in user's options file
+#' @param fields A vector of DESCRIPTION file fields to use in the PACKAGES file.
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import utils
@@ -32,7 +33,8 @@ install_package_to_repo <-
            repos = getOption('repos'),
            repo = get_repo_location(),
            type = 'source',
-           repo_name = get_repo_name()
+           repo_name = get_repo_name(),
+           fields = get_packages_fields()
   ) {
     
     # Fileloc is used for temp files
@@ -191,5 +193,5 @@ install_package_to_repo <-
       print(out)
     }
     
-    write_modpac(repo)
+    write_modpac(repo, fields = fields)
   }

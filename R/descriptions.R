@@ -1,6 +1,8 @@
 #' Extract description from source package(s)
 #'
 #' @param x a .tar.gz package
+#' @param fields A vector of DESCRIPTION file fields, or \code{NULL} to extract
+#'   all of them.
 #'
 #' @return a data.table/data.frame object containing Description info
 #' @importFrom data.table rbindlist
@@ -8,7 +10,7 @@
 #'
 #' @examples
 #' extract_description('test.tar.gz')
-extract_description <- function(x) {
+extract_description <- function(x, fields = NULL) {
 
   # unpack description files
   tmp <-
@@ -33,7 +35,7 @@ extract_description <- function(x) {
     data.table::rbindlist(
       lapply(DESCfiles,
              function(file)
-               data.frame(read.dcf(file, fields = NULL))),
+               data.frame(read.dcf(file, fields = fields))),
       fill = TRUE)
   out
 }
@@ -140,13 +142,15 @@ modify_description <- function(field, value, file) {
 #' Extract descriptions from a repository
 #'
 #' @param repo a path to a repository
+#' @param fields A vector of DESCRIPTION file fields, or \code{NULL} to extract
+#'   all of them.
 #'
 #' @return a data.table/data.frame object containing Description info
 #' @export
 #'
 #' @examples
 #' repo_descriptions()
-repo_descriptions <- function(repo = get_repo_location()) {
+repo_descriptions <- function(repo = get_repo_location(), fields = NULL) {
   # Location of source files
   rurl <- contrib.url(repo)
 
@@ -155,7 +159,7 @@ repo_descriptions <- function(repo = get_repo_location()) {
 
   # Extract only description files from tarballs, use the base directory name
   # in the tarball, store them in tempdir
-  out <- extract_description(pacs)
+  out <- extract_description(pacs, fields = fields)
 
   # Add originating location
   out$Path <- pacs

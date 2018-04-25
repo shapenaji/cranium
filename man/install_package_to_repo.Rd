@@ -6,7 +6,7 @@
 \usage{
 install_package_to_repo(pkg, repos = getOption("repos"),
   repo = get_repo_location(), type = "source",
-  repo_name = get_repo_name())
+  repo_name = get_repo_name(), fields = get_packages_fields())
 }
 \arguments{
 \item{pkg}{Options:
@@ -32,6 +32,8 @@ a list of repos that will be checked for the package (getOption('repos')) OR an 
 \item{type}{Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.}
 
 \item{repo_name}{default: NULL, A name to give the repo, will be used by packrat to search for sources in user's options file}
+
+\item{fields}{A vector of DESCRIPTION file fields to use in the PACKAGES file.}
 }
 \value{
 A Descriptions Table of the packages made available

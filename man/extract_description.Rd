@@ -4,10 +4,13 @@
 \alias{extract_description}
 \title{Extract description from source package(s)}
 \usage{
-extract_description(x)
+extract_description(x, fields = NULL)
 }
 \arguments{
 \item{x}{a .tar.gz package}
+
+\item{fields}{A vector of DESCRIPTION file fields, or \code{NULL} to extract
+all of them.}
 }
 \value{
 a data.table/data.frame object containing Description info
