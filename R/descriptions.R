@@ -101,47 +101,39 @@ modify_descriptions <- function(field, value) {
 #' @return A new available packages table
 #' @export
 modify_description <- function(field, value, file) {
-  source_files <- file
-  exit_dir <- file.path(tempdir(),'package/')
-  tmp <- 
-    Map(function(tarfile, exdir) {
-      untar(
-        tarfile = tarfile,
-        exdir = exdir
-      )}
-      ,tarfile = source_files
-      ,exdir = file.path(exit_dir, noEXT(source_files))
-    )
-  
-  pac_files <-
-    list.files(file.path(exit_dir, noEXT(source_files)),
-               recursive = TRUE,
-               full.names = TRUE,
-               include.dirs = FALSE)
-  
-  # Select only the description files
-  unpacked <- gsub(exit_dir,'',pac_files, fixed = TRUE)
-  unpacked_descs <- grepl('^/.*?/.*?/DESCRIPTION$', unpacked)
-  build_locations <- gsub('^/(.*?/.*?/.*?).*','\\1', unpacked[unpacked_descs])
-  
-  descs <- lapply(pac_files[unpacked_descs], 
-                  function(file)
-                    data.frame(read.dcf(file, fields = NULL)))
-  
-  descs <- lapply(descs, function(x) {x[[field]] <- value;x})
-  
-  # Update all description files
-  Map(write.dcf, descs, pac_files[unpacked_descs])
-  
-  # Rebuild packages
-  Map(function(pkg, path) devtools::build(pkg), 
-      pkg = file.path(exit_dir, build_locations))
-  
-  
-  builds <- list.files(list.files(exit_dir, full.names = TRUE), 
-                       full.names = TRUE, pattern = '\\.tar\\.gz$')
-  
-  file.rename(builds, source_files)
+  if (!grepl("\\.tar\\.gz$", file)) {
+    stop("'file' must be a package bundle.")
+  }
+
+  exdir <- file.path(tempdir(), "extracted", noEXT(file))
+  on.exit(unlink(exdir, recursive = TRUE))
+
+  # We don't want to accidentally add anything to the archive later, so be sure
+  # to clean up first.
+  unlink(exdir, recursive = TRUE)
+  untar(tarfile = file, exdir = exdir, compressed = "gzip", restore_times = FALSE)
+
+  pkgdir <- list.dirs(exdir, full.names = TRUE, recursive = FALSE)
+
+  desc <- as.data.frame(
+    read.dcf(file.path(pkgdir, "DESCRIPTION"), fields = NULL),
+    stringsAsFactors = FALSE
+  )
+  desc[[field]] <- value
+  write.dcf(desc, file = file.path(pkgdir, "DESCRIPTION"))
+
+  new_bundle <- file.path(exdir, basename(file))
+  # To mimic R CMD build, we need to operate tar() on the current directory.
+  curr_dir <- getwd()
+  on.exit(setwd(curr_dir))
+  setwd(exdir)
+  tar(
+    new_bundle,
+    files = list.dirs(exdir, full.names = FALSE, recursive = FALSE),
+    compression = "gzip"
+  )
+
+  file.rename(new_bundle, file)
 }
 
 
