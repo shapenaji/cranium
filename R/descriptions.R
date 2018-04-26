@@ -35,7 +35,8 @@ extract_description <- function(x, fields = NULL) {
     data.table::rbindlist(
       lapply(DESCfiles,
              function(file)
-               data.frame(read.dcf(file, fields = fields))),
+               as.data.frame(read.dcf(file, fields = fields),
+                             stringsAsFactors = FALSE)),
       fill = TRUE)
   out
 }

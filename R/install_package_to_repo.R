@@ -193,5 +193,6 @@ install_package_to_repo <-
       print(out)
     }
     
-    write_modpac(repo, fields = fields)
+    # FIXME: Need to ensure that pkg is the actual tarball name.
+    write_modpac(repo, fields = fields, new_pkgs = basename(pkg))
   }

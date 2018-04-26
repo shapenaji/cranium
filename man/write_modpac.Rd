@@ -4,7 +4,8 @@
 \alias{write_modpac}
 \title{Writes modified PACKAGES files to allow install.packages to access versions}
 \usage{
-write_modpac(repo = get_repo_location(), fields = get_packages_fields())
+write_modpac(repo = get_repo_location(), fields = get_packages_fields(),
+  new_pkgs = NULL)
 }
 \arguments{
 \item{repo}{Repository Directory (by default, this uses the repo location set with "set_repo_location")}
