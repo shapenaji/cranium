@@ -4,10 +4,13 @@
 \alias{repo_descriptions}
 \title{Extract descriptions from a repository}
 \usage{
-repo_descriptions(repo = get_repo_location())
+repo_descriptions(repo = get_repo_location(), fields = NULL)
 }
 \arguments{
 \item{repo}{a path to a repository}
+
+\item{fields}{A vector of DESCRIPTION file fields, or \code{NULL} to extract
+all of them.}
 }
 \value{
 a data.table/data.frame object containing Description info
