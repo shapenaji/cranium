@@ -12,12 +12,18 @@
 #' extract_description('test.tar.gz')
 extract_description <- function(x, fields = NULL) {
 
+  
   # unpack description files
   tmp <-
     Map(function(tarfile, exdir) {
+      # list files in tarball
+      files_in_tarball <- untar(tarfile, list = TRUE)
+      extractfiles <- grep('DESCRIPTION$',files_in_tarball,ignore.case = FALSE,value = TRUE)
+      # if multiple, take the shortest one
+      extractfiles <- extractfiles[which.min(nchar(extractfiles))]
       untar(
         tarfile = tarfile,
-        files = sprintf('%s/DESCRIPTION',getbasedir(tarfile)),
+        files = extractfiles,
         exdir = exdir
       )}
       ,tarfile = x
