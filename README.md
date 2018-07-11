@@ -1,52 +1,50 @@
-# Construct your Cranium
-Nicholas Jhirad  
+Construct your Cranium
+================
+Nicholas Jhirad
 
+The cranium package
+-------------------
 
+This document covers version &gt;= 1.0.0 of the package and is intended to be an
+introduction to the package,
 
-## The cranium package
+The `cranium` package functions similarly to the excellent [miniCRAN](https://github.com/RevolutionAnalytics/miniCRAN) with a few exceptions:
 
-This document covers version >= 0.2.0 of the package and is intended to be an  
-introduction to the package, 
+-   Multiple versions of a package can be stored in a repo, and users can install versions by running `install.packages('<package_name>_<version_number>', repos = <your_repo>)`
 
+-   `install_package_to_repo(...)` functions as an omnitool, and installs from other repos, .git locations, local directories or from github
 
+-   We support alternate DESCRIPTION fields (for example, if you want to add a NEWS headline to users who might install your package) see `?set_packages_fields`
 
-The `cranium` package functions similarly to the excellent [miniCRAN](https://github.com/RevolutionAnalytics/miniCRAN) with a few exceptions:  
+Not all packages are free to distribute on github, and even if they are,
+you may want your own stable working repository for your applications
 
-* Multiple versions of a package can be stored in a repo, and users can install 
-  versions by running `install.packages('<package_name>_<version_number>', repos = <your_repo>)`
+The cranium package aims to make creating/populating/maintaining a private repository
+quick and painless, while storing older versions of packages that can be requested on demand.
 
-* `install_package_to_repo(...)` functions as an omnitool, and installs from other repos, 
-                             .git locations, local directories or from github
-
-
-Not all packages are free to distribute on github, and even if they are,  
-you may want your own stable working repository for your applications  
-
-The cranium package aims to make creating/populating/maintaining a private repository  
-quick and painless, while storing older versions of packages that can be requested on demand.  
-
-## Package Details
+Package Details
+---------------
 
 The package depends on:
- 
- * `data.table` version >= 1.10
- * `tools`
- * `utils`
+
+-   `data.table` version &gt;= 1.10
+-   `tools`
+-   `utils`
 
 the package suggests:
- 
- * `git2r`     for github and git
- * `httr`      for checking sources
- * `openssl`   for hashes and password entry
+
+-   `git2r` for github and git
+-   `httr` for checking sources
+-   `openssl` for hashes and password entry
 
 It requires no installation for users.
 
-but a private server running apache may be recommended.  
+but a private server running apache may be recommended.
 
-## Creating a Repository
+Creating a Repository
+---------------------
 
-
-```r
+``` r
 library(cranium)
 
 # For the purposes of this vignette, we'll use a temporary dir
@@ -58,59 +56,48 @@ That's it!
 
 This will create the basic folder structure for your repo.
 
-For my usecase, I started a web-server, and deployed the repository to my
-live directory.
+For my usecase, I started a web-server, and deployed the repository to my live directory.
 
+Populating a Repository
+-----------------------
 
-## Populating a Repository
+Installing another version will NOT overwrite the existing one,
+the index updating function will manage this and create new install versions for the other versions.
 
-Installing another version will NOT overwrite the existing one,   
-the index updating function will manage this and create new install versions
-for the other versions. 
-
-The repository will always link the base package name to the newest version 
-by default, but if there are multiple versions, these are available via
+The repository will always link the base package name to the newest version by default, but if there are multiple versions, these are available via
 
 `<package>_<version>`
-
-
-
 
 We always start by setting our repo location.
 
 ### Set Repo Location First
 
-
-```r
+``` r
 set_repo_location(tempdir())
 ```
 
 ### Install from github:
 
-
-```r
+``` r
 install_package_to_repo(pkg = 'miniCRAN', 
                         repos = 'https://github.com/RevolutionAnalytics/')
 ```
 
 ### Install the CRAN version:
 
-
-```r
+``` r
 install_package_to_repo(pkg = 'miniCRAN')
 ```
 
 ### Installing from git:
 
-
-```r
+``` r
 install_package_to_repo('https://path/to/package.git')
 ```
 
 ### Installing a local package:
 
-
-```r
+``` r
 install_package_to_repo('path/to/package.tar.gz', repos = NULL)
 ```
 
@@ -120,44 +107,38 @@ Or we can install using a Repository "name" (as of v0.4.1)
 
 packrat uses this name to lookup the repo location in installs to RStudio Connect
 
-(it will check getOption('repos')['REPO_NAME'])
+(it will check getOption('repos')\['REPO\_NAME'\])
 
-
-```r
+``` r
 install_package_to_repo(pkg = 'path/to/package.tar.gz', 
                         repos = NULL, 
                         repo_name = 'MyRepoName')
 ```
 
-
 We can also set the repo name globally:
 
-
-```r
+``` r
 set_repo_name('MyRepoName')
 
 # Everything gets installed with Repo "MyRepoName"
 install_package_to_repo(pkg = 'miniCRAN')
 ```
 
+Checking the repository
+-----------------------
 
-## Checking the repository
-
-
-```r
+``` r
 # We can use the available.packages function from utils
 # to browse repos
 available.packages(contrib.url(file.path('file:/',tempdir())))
 ```
 
+Using the repository
+--------------------
 
-## Using the repository
+the cranium package does not need to be installed by your users. They only need to see the final product, the repo, whether on a network drive or on a webserver.
 
-the cranium package does not need to be installed by your users.
-They only need to see the final product, the repo, whether on a network drive or on a webserver.
-
-
-```r
+``` r
 # Install from local
 install.packages('miniCRAN',file.path('file:/',tempdir()))
 
@@ -170,11 +151,9 @@ install.packages('miniCRAN', 'http://hostname/repolocation')
 install.packages('miniCRAN_0.2.7', 'http://hostname/repolocation')
 ```
 
-Easiest of all, however, is to include this repository among your/their options
-in your `.Rprofile` or `Rprofile.site` file.
+Easiest of all, however, is to include this repository among your/their options in your `.Rprofile` or `Rprofile.site` file.
 
-
-```r
+``` r
 # Add to .RProfile
 local({
     repos <- getOption("repos")
@@ -186,19 +165,18 @@ local({
 })
 ```
 
-## Modifying the repository
+Modifying the repository
+------------------------
 
 We also include functions for maintaining the repository,
 
-`modify_descriptions` will adjust every description in the repository. 
-Adding the given field with the given value. This can be handy for setting Repository name
+`modify_descriptions` will adjust every description in the repository. Adding the given field with the given value. This can be handy for setting Repository name
 
 `modify_description` can be used to modify a single tar.gz file
 
 **Note: Both functions rebuild packages. Make sure you modify under the desired R version.**
 
-
-```r
+``` r
 set_repo_location('/var/www/html/mini_CRAN_Repo')
 
 # Set the repository for all packages to be the current repo_name

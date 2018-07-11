@@ -7,6 +7,8 @@ css/
 \.gitignore
 \.git/
 ^README
+*.html
+*.csv
 ^\.Rprofile
 ^\.Rhistory
 

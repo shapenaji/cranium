@@ -163,6 +163,8 @@ install_package_to_repo <-
       
       # If package is internal, copy it from it's current location
     } else if(any(isInternal)) {
+      
+      
       # Modify Description to use Repo
       if(!is.null(repo_name)) {
         modify_description('Repository', repo_name, pkg)
@@ -184,6 +186,7 @@ install_package_to_repo <-
           repos = repos,
           type = type
         )
+      
       
       # Modify Description to use Repo
       if(!is.null(repo_name)) {

@@ -2,18 +2,9 @@
 title: "Construct your Cranium"
 author: "Nicholas Jhirad"
 params:
-  version: "0.2.0"
+  version: "1.0.0"
 output:
-  html_document:
-    keep_md: TRUE
-    highlight: null
-    mathjax: null
-    toc: true
-    theme: flatly
-    fold: TRUE
-    toc_float:
-      collapsed: FALSE
-      smooth_scroll: true
+  github_document
 ---
 
 ```{r include=FALSE}
@@ -46,6 +37,8 @@ The `cranium` package functions similarly to the excellent [miniCRAN](https://gi
 * `install_package_to_repo(...)` functions as an omnitool, and installs from other repos, 
                              .git locations, local directories or from github
 
+* We support alternate DESCRIPTION fields (for example, if you want to add a NEWS headline to users who might install your package) see `?set_packages_fields`
+
 
 Not all packages are free to distribute on github, and even if they are,  
 you may want your own stable working repository for your applications  
@@ -73,7 +66,7 @@ but a private server running apache may be recommended.
 
 ## Creating a Repository
 
-```{r Setup, message=FALSE}
+```{r Setup, message=FALSE, echo=TRUE, eval=FALSE}
 library(cranium)
 
 # For the purposes of this vignette, we'll use a temporary dir
@@ -102,7 +95,7 @@ by default, but if there are multiple versions, these are available via
 `<package>_<version>`
 
 
-```{r InstallPackages, warning=FALSE, cache=TRUE, include=FALSE}
+```{r InstallPackages, warning=FALSE, echo=TRUE, eval=FALSE, include=FALSE}
 
 ###################################################################
 # For the purposes of this vignette, I will be using the following
@@ -176,7 +169,7 @@ packrat uses this name to lookup the repo location in installs to RStudio Connec
 
 (it will check getOption('repos')['REPO_NAME'])
 
-```{r InstallPackagesVis7, eval = FALSE}
+```{r InstallPackagesVis7, echo=TRUE, eval=FALSE}
 
 install_package_to_repo(pkg = 'path/to/package.tar.gz', 
                         repos = NULL, 
@@ -187,7 +180,7 @@ install_package_to_repo(pkg = 'path/to/package.tar.gz',
 
 We can also set the repo name globally:
 
-```{r InstallPackagesVis8, eval = FALSE}
+```{r InstallPackagesVis8, echo=TRUE, eval=FALSE}
 set_repo_name('MyRepoName')
 
 # Everything gets installed with Repo "MyRepoName"
@@ -212,7 +205,7 @@ available.packages(contrib.url(file.path('file:/',tempdir())))
 the cranium package does not need to be installed by your users.
 They only need to see the final product, the repo, whether on a network drive or on a webserver.
 
-```{r usingrepo, eval=FALSE, message=TRUE, warning=FALSE}
+```{r usingrepo, echo=TRUE, eval=FALSE, message=TRUE, warning=FALSE}
 
 # Install from local
 install.packages('miniCRAN',file.path('file:/',tempdir()))
@@ -231,7 +224,7 @@ install.packages('miniCRAN_0.2.7', 'http://hostname/repolocation')
 Easiest of all, however, is to include this repository among your/their options
 in your `.Rprofile` or `Rprofile.site` file.
 
-```{r addtooptions, eval=FALSE, message=TRUE, warning=FALSE}
+```{r addtooptions, echo=TRUE, eval=FALSE, message=TRUE, warning=FALSE}
 
 # Add to .RProfile
 local({
@@ -256,7 +249,7 @@ Adding the given field with the given value. This can be handy for setting Repos
 
 **Note: Both functions rebuild packages. Make sure you modify under the desired R version.**
 
-```{r modifydescriptions, eval=FALSE, message=TRUE, warning=FALSE}
+```{r modifydescription, echo=TRUE, eval=FALSE, message=TRUE, warning=FALSE}
 
 set_repo_location('/var/www/html/mini_CRAN_Repo')
 
