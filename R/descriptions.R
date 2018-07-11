@@ -21,6 +21,7 @@ extract_description <- function(x, fields = NULL) {
       extractfiles <- grep('DESCRIPTION$',files_in_tarball,ignore.case = FALSE,value = TRUE)
       # if multiple, take the shortest one
       extractfiles <- extractfiles[which.min(nchar(extractfiles))]
+      message('extracting ', extractfiles)
       untar(
         tarfile = tarfile,
         files = extractfiles,
@@ -55,22 +56,33 @@ extract_description <- function(x, fields = NULL) {
 #' @return A new available packages table
 #' @export
 modify_descriptions <- function(field, value) {
-  source_files <- list.files(contrib.url(get_repo_location()), 
-                             full.names = TRUE, 
-                             pattern = '\\.tar\\.gz$')
+  # source_files <- list.files(contrib.url(get_repo_location()), 
+  #                            full.names = TRUE, 
+  #                            pattern = '\\.tar\\.gz$')
   exit_dir <- file.path(tempdir(),'package/')
+  prds_loc <- file.path(contrib.url(get_repo_location()),'PACKAGES.rds')
+  if(!file.exists(prds_loc))
+    stop('No PACKAGES.rds found. Run write_modpac on this directory and then rerun.')
+  current_repo <- readRDS(prds_loc)
+  current_repo <- setDT(data.frame(current_repo))
+  # Convert Reserved Names
+  current_repo[, PackageRoot := gsub('^(.*?)_.*$','\\1',Package)]
+  nohardlinks <- current_repo[, .SD[which.min(nchar(as.character(Package)))], by = .(PackageRoot, Version)]
+  locations <- file.path(contrib.url(get_repo_location()), paste0(nohardlinks$PackageRoot,'_',nohardlinks$Version,'.tar.gz'))
+  
   tmp <- 
     Map(function(tarfile, exdir) {
+      message('Untarring ', tarfile, ' into ', exdir)
       untar(
         tarfile = tarfile,
         exdir = exdir
       )}
-      ,tarfile = source_files
-      ,exdir = file.path(exit_dir, noEXT(source_files))
+      ,tarfile = locations
+      ,exdir = file.path(exit_dir, noEXT(locations))
     )
   
   pac_files <-
-    list.files(file.path(exit_dir, noEXT(source_files)),
+    list.files(file.path(exit_dir, noEXT(locations)),
                recursive = TRUE,
                full.names = TRUE,
                include.dirs = FALSE)
@@ -86,19 +98,34 @@ modify_descriptions <- function(field, value) {
   
   descs <- lapply(descs, function(x) {x[[field]] <- value;x})
   
-  # Update all description files
+  # Update all description files in their original location?
   Map(write.dcf, descs, pac_files[unpacked_descs])
   
   # Retar 
   # Rebuild packages
-  Map(function(pkg, path) devtools::build(pkg), 
+  # Try catch, if building fails, move on but do not write file. 
+  # It's okay to leave broken packages in the repo, we just need to warn
+  rebuilt <- Map(function(pkg) {
+    message('Rebuilding ', pkg)
+    tryCatch({
+      devtools::build(pkg, quiet = TRUE)
+    }, error = function(e) {
+      message('Failed to build package: ', e)
+      message('Skipping')
+      return(NULL)
+    })
+    }, 
       pkg = file.path(exit_dir, build_locations))
   
   
-  builds <- list.files(list.files(exit_dir, full.names = TRUE), 
-                       full.names = TRUE, pattern = '\\.tar\\.gz$')
+  builds <- unlist(rebuilt[lengths(rebuilt) > 0])
+  locations <- locations[lengths(rebuilt) > 0]
+  ops <- file.copy(builds, file.path(contrib.url(get_repo_location()),basename(builds)),overwrite = TRUE)
   
-  file.rename(builds, source_files)
+  if(any(!ops)) {
+    # inform the user that these packages were not updated
+    message('The following packages failed to copy')
+  }
   write_modpac(get_repo_location())
 }
 
