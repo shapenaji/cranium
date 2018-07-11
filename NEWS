@@ -1,3 +1,9 @@
+cranium v1.0.0 (Release date: 2018-07-11)
+==============
+
+Changes:
+* Package index is not rebuilt on every new package (Thanks atheriel!)
+
 cranium v0.4.5 (Release date: 2017-12-16)
 ==============
 
