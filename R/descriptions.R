@@ -83,6 +83,7 @@ modify_descriptions <- function(field, value) {
   # Update all description files
   Map(write.dcf, descs, pac_files[unpacked_descs])
   
+  # Retar 
   # Rebuild packages
   Map(function(pkg, path) devtools::build(pkg), 
       pkg = file.path(exit_dir, build_locations))
@@ -131,12 +132,16 @@ modify_description <- function(field, value, file) {
   on.exit(setwd(curr_dir))
   setwd(exdir)
   tar(
-    new_bundle,
-    files = list.dirs(exdir, full.names = FALSE, recursive = FALSE),
+    basename(file),
+    files = list.dirs(),
     compression = "gzip"
   )
+  # file may be a relative path
+  setwd(curr_dir)
+  on.exit()
 
-  file.rename(new_bundle, file)
+  # We want to fail if we fail to modify, not return a warning
+  stopifnot(file.rename(new_bundle, file))
 }
 
 
