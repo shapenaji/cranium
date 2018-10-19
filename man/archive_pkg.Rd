@@ -2,15 +2,15 @@
 % Please edit documentation in R/archive.R
 \name{archive_pkg}
 \alias{archive_pkg}
-\title{Move a Package to the Repository's Archive}
+\title{Move Packages to the Repository's Archive}
 \usage{
 archive_pkg(pkg, version, repo = get_repo_location(), type = "source",
-  keep = TRUE)
+  keep = TRUE, overwrite = FALSE)
 }
 \arguments{
-\item{pkg}{The name of the package to archive, e.g. \code{"cranium"}.}
+\item{pkg}{A vector of package names to archive, e.g. \code{"cranium"}.}
 
-\item{version}{The package version to archive.}
+\item{version}{A vector of valid package versions to archive.}
 
 \item{repo}{The location of the package repository.}
 
@@ -18,7 +18,14 @@ archive_pkg(pkg, version, repo = get_repo_location(), type = "source",
 
 \item{keep}{When \code{TRUE}, do not remove the package from the repository
 after it has been archived.}
+
+\item{overwrite}{When \code{TRUE}, overwrite existing archived packages, if
+present.}
+}
+\value{
+A logical vector indicating which packages were moved to the archive
+  successfully.
 }
 \description{
-Move a Package to the Repository's Archive
+Move Packages to the Repository's Archive
 }
