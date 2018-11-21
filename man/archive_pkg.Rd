@@ -5,7 +5,7 @@
 \title{Move Packages to the Repository's Archive}
 \usage{
 archive_pkg(pkg, version, repo = get_repo_location(), type = "source",
-  keep = TRUE, overwrite = FALSE)
+  keep = TRUE, overwrite = !keep)
 }
 \arguments{
 \item{pkg}{A vector of package names to archive, e.g. \code{"cranium"}.}
@@ -16,8 +16,8 @@ archive_pkg(pkg, version, repo = get_repo_location(), type = "source",
 
 \item{type}{The type of the package. Only \code{"source"} is supported.}
 
-\item{keep}{When \code{TRUE}, do not remove the package from the repository
-after it has been archived.}
+\item{keep}{When \code{FALSE}, remove packages from the repository that exist
+in the archive. See Details.}
 
 \item{overwrite}{When \code{TRUE}, overwrite existing archived packages, if
 present.}
@@ -28,4 +28,14 @@ A logical vector indicating which packages were moved to the archive
 }
 \description{
 Move Packages to the Repository's Archive
+}
+\details{
+When \code{keep} is \code{FALSE}, packages that have been archived (either by
+this function or because they exist there already) will be removed. Bear in
+mind that when \code{overwrite} is also \code{FALSE}, this could result in
+lost data if a package differs from its archived version.
+
+Also, keep in mind when removing packages that you will likely need to update
+the repository index to reflect the changes. This will not happen
+automatically; see \code{\link{write_modpac}}.
 }

@@ -4,17 +4,28 @@
 #' @param version A vector of valid package versions to archive.
 #' @param repo The location of the package repository.
 #' @param type The type of the package. Only \code{"source"} is supported.
-#' @param keep When \code{TRUE}, do not remove the package from the repository
-#'   after it has been archived.
+#' @param keep When \code{FALSE}, remove packages from the repository that exist
+#'   in the archive. See Details.
 #' @param overwrite When \code{TRUE}, overwrite existing archived packages, if
 #'   present.
 #'
 #' @return A logical vector indicating which packages were moved to the archive
 #'   successfully.
 #'
+#' @details
+#'
+#' When \code{keep} is \code{FALSE}, packages that have been archived (either by
+#' this function or because they exist there already) will be removed. Bear in
+#' mind that when \code{overwrite} is also \code{FALSE}, this could result in
+#' lost data if a package differs from its archived version.
+#'
+#' Also, keep in mind when removing packages that you will likely need to update
+#' the repository index to reflect the changes. This will not happen
+#' automatically; see \code{\link{write_modpac}}.
+#'
 #' @export
 archive_pkg <- function(pkg, version, repo = get_repo_location(),
-                        type = "source", keep = TRUE, overwrite = FALSE) {
+                        type = "source", keep = TRUE, overwrite = !keep) {
   stopifnot(length(pkg) == length(version))
   if (type != "source") {
     stop("Only 'source' type packages can be archived at present.")
@@ -44,12 +55,6 @@ archive_pkg <- function(pkg, version, repo = get_repo_location(),
     dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   }
 
-  # TODO: Should this be an error? Or can we rely on the user checking the
-  # returned value to see if things have been archived?
-  # if (!overwrite && any(file.exists(archived_paths))) {
-  #   stop("Archived versions of some packages already exist.")
-  # }
-
   copied <- file.copy(current_paths, archived_paths, overwrite = overwrite)
 
   # NOTE: Sys.setFileTime is not vectorized (3.4.4), so we work around that.
@@ -59,20 +64,19 @@ archive_pkg <- function(pkg, version, repo = get_repo_location(),
     Sys.setFileTime(archived_paths[copied][i], fi$mtime[i])
   }
 
-  # TODO: Do we need this error? Best reason to fail here is to prevent
-  # anything from being deleted if the copy failed.
+  # This should never happen, so error out if it does to prevent deleting data.
   if (overwrite && !all(copied)) {
     stop("Failed to copy ", sum(copied == FALSE), " packages to the archive.")
   }
 
   if (!keep) {
+    # Note that current_paths and current_paths[copied] will only be different
+    # here if the user is mixing keep=TRUE and keep=FALSE. We'll respect their
+    # most recent wishes and remove anything that's in the archive.
     removed <- file.remove(current_paths)
     if (!all(removed)) {
       stop("Failed to remove all existing packages.")
     }
-    # TODO: Regenerate the package index.
-    warning("The repository index has not been updated, and may be ",
-            "inconsistent with available packages.")
   }
 
   copied
