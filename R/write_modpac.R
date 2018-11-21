@@ -12,18 +12,7 @@ write_modpac <- function(repo = get_repo_location(),
                          fields = get_packages_fields(), new_pkgs = NULL) {
 
 
-  # We write three versions of the PACKAGES file, two in dcf format, 
-  # one in native rds format
-  out <- file(sprintf('%s/%s',contrib.url(repo), "PACKAGES"), "wt")
-  outgz <- gzfile(sprintf('%s/%s',contrib.url(repo), "PACKAGES.gz"), "wt")
   outrds <- file.path(contrib.url(repo), "PACKAGES.rds")
-
-  # Close connections on exit
-  on.exit({
-    close(out)
-    close(outgz)
-  })
-  
   update <- !is.null(new_pkgs) && file.exists(outrds)
 
   if (update) {
@@ -100,27 +89,41 @@ write_modpac <- function(repo = get_repo_location(),
 
   cranDESCs <- cranDESCs[order(Package, Version),]
 
-  desc <- as.matrix(cranDESCs)
+  np <- write_PACKAGES_files(cranDESCs, contrib.url(repo))
+  message("Indexed ", np, " packages.")
 
-  for (i in seq_len(nrow(desc))) {
-    #browser()
-    desci <- desc[i, !(is.na(desc[i,]) | (desc[i,] == "")), drop = FALSE]
-
-    # Save a 
-    write.dcf(desci, file = out)
-    cat("\n", file = out)
-    
-    # Save a gz version
-    write.dcf(desci, file = outgz)
-    cat("\n", file = outgz)
-    
-    # as of R 3.4, we also save an rds version
-    
-  }
-
-  saveRDS(desc, outrds)
   # Return descriptions, so we can see what's in there
-  cranDESCs
+  invisible(cranDESCs)
+}
+
+#' Write the Package Indices to Disk
+#'
+#' Write the package indices to disk in the format compatible with
+#' \code{\link[tools]{write_PACKAGES}}.
+#'
+#' @param index A data frame of package metadata fields.
+#' @param dir The directory to write the indices in.
+#'
+#' @return The number of packages in the index, invisibly.
+#'
+#' @noRd
+write_PACKAGES_files <- function(index, dir) {
+  db <- as.matrix(index)
+
+  # Copied from tools::write_PACKAGES() as of R 3.5.1.
+  np <- NROW(db)
+  if (np > 0L) {
+    db[!is.na(db) & (db == "")] <- NA_character_
+    con <- file(file.path(dir, "PACKAGES"), "wt")
+    write.dcf(db, con)
+    close(con)
+    con <- gzfile(file.path(dir, "PACKAGES.gz"), "wt")
+    write.dcf(db, con)
+    close(con)
+    rownames(db) <- db[, "Package"]
+    saveRDS(db, file.path(dir, "PACKAGES.rds"), compress = "xz")
+  }
+  invisible(np)
 }
 
 
