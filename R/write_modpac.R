@@ -4,12 +4,15 @@
 #' @param fields A vector of DESCRIPTION file fields to use in the PACKAGES file.
 #' @param new_pkgs A vector of packages that need to be added to the index. When
 #'   \code{NULL}, the entire index will be reconstructed instead.
+#' @param use_archive When \code{TRUE}, create archive entries for older
+#'   package versions.
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import data.table
 #' @export
 write_modpac <- function(repo = get_repo_location(),
-                         fields = get_packages_fields(), new_pkgs = NULL) {
+                         fields = get_packages_fields(), new_pkgs = NULL,
+                         use_archive = TRUE) {
 
 
   outrds <- file.path(contrib.url(repo), "PACKAGES.rds")
@@ -57,6 +60,13 @@ write_modpac <- function(repo = get_repo_location(),
   cranDESCs[,IsNewest := (.N == frank(ifelse(is_max_ver(Version), 1, 0),
                                       ties.method = 'first')),
             by = Package]
+
+  if (use_archive) {
+    cranDESCs[,CanArchive := !is_max_ver(Version), by = Package]
+    old <- cranDESCs[(CanArchive)]
+    out <- archive_pkg(old$Package, old$Version, repo = repo)
+    message("Archived ", sum(out), " packages.")
+  }
 
   # Drop hardlink entries if we're regenerating the index from a file list
   # before we actually compute metadata. Remember that md5sum is expensive!
