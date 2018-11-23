@@ -6,7 +6,7 @@
 \usage{
 write_modpac(repo = get_repo_location(),
   fields = get_packages_fields(), new_pkgs = NULL,
-  use_archive = TRUE)
+  use_archive = TRUE, use_hardlinks = TRUE, latest_only = TRUE)
 }
 \arguments{
 \item{repo}{Repository Directory (by default, this uses the repo location set with "set_repo_location")}
