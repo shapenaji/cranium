@@ -28,3 +28,10 @@ dummy_repo <- function(bundles, repo = tempfile("repo"), type = "source") {
 available <- function(repo, type = "source") {
   nrow(utils::available.packages(repos = paste0("file://", repo), type = type))
 }
+
+# Set this to a real list of files to run the tests.
+SAMPLE_BUNDLES <- character(0)
+
+if (length(SAMPLE_BUNDLES) == 0) {
+  stop("Point 'SAMPLE_BUNDLES' towards package tarballs to run the tests.")
+}
