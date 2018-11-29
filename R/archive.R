@@ -27,6 +27,13 @@
 archive_pkg <- function(pkg, version, repo = get_repo_location(),
                         type = "source", keep = TRUE, overwrite = !keep) {
   stopifnot(length(pkg) == length(version))
+
+  # Although this is likely a user error, let's be consistent with vector
+  # inputs.
+  if (length(pkg) == 0) {
+    return(logical(0))
+  }
+
   if (type != "source") {
     stop("Only 'source' type packages can be archived at present.")
   }
