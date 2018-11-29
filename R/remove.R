@@ -4,13 +4,15 @@
 #' @param version A vector of valid package versions to archive.
 #' @param repo The location of the package repository.
 #' @param type The type of the package. Only \code{"source"} is supported.
+#' @param remove_hardlinks Also remove any hardlinks to the packages, if they
+#'   exist.
 #'
 #' @return A logical vector indicating which packages were removed
 #'   successfully.
 #'
 #' @export
 remove_pkg <- function(pkg, version, repo = get_repo_location(),
-                       type = "source") {
+                       type = "source", remove_hardlinks = FALSE) {
   stopifnot(length(pkg) == length(version))
 
   # Although this is likely a user error, let's be consistent with vector
@@ -33,6 +35,16 @@ remove_pkg <- function(pkg, version, repo = get_repo_location(),
   }
 
   removed <- file.remove(current_paths)
+
+  if (remove_hardlinks) {
+    hardlink_files <- file.path(
+      contrib_url, paste0(pkg, "_", version, "_", version, ".tar.gz")
+    )
+    hardlink_files <- hardlink_files[!duplicated(hardlink_files)]
+
+    exist <- file.exists(hardlink_files)
+    removed[exist] <- removed[exist] & file.remove(hardlink_files[exist])
+  }
 
   removed
 }

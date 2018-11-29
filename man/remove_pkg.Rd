@@ -4,7 +4,8 @@
 \alias{remove_pkg}
 \title{Remove Packages from a Repository}
 \usage{
-remove_pkg(pkg, version, repo = get_repo_location(), type = "source")
+remove_pkg(pkg, version, repo = get_repo_location(), type = "source",
+  remove_hardlinks = FALSE)
 }
 \arguments{
 \item{pkg}{A vector of package names to archive, e.g. \code{"cranium"}.}
@@ -14,6 +15,9 @@ remove_pkg(pkg, version, repo = get_repo_location(), type = "source")
 \item{repo}{The location of the package repository.}
 
 \item{type}{The type of the package. Only \code{"source"} is supported.}
+
+\item{remove_hardlinks}{Also remove any hardlinks to the packages, if they
+exist.}
 }
 \value{
 A logical vector indicating which packages were removed
