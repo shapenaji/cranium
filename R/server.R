@@ -49,7 +49,7 @@ router <- function(repo) {
     if (req$REQUEST_METHOD == "POST" && path == "/") {
       parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
       if (!"file" %in% names(parsed)) {
-        return(bad_request())
+        return(bad_request("Request must contain a 'file' in the form."))
       }
 
       # Don't rely on the filename to infer the package name and version.
@@ -66,7 +66,7 @@ router <- function(repo) {
       })
       if (inherits(pkg, "try-error")) {
         # TODO: Log the error.
-        return(bad_request())
+        return(bad_request("Invalid package bundle."))
       }
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
@@ -97,13 +97,12 @@ router <- function(repo) {
     if (req$REQUEST_METHOD == "PUT" && grepl("^/src", path)) {
       location <- file.path(repo, sub("^/", "", path))
       if (dirname(location) != contrib.url(repo, type = "source")) {
-        # TODO: Use a better message here.
-        return(bad_request())
+        return(bad_request("URI does not match the repository structure."))
       }
 
       parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
       if (!"file" %in% names(parsed)) {
-        return(bad_request())
+        return(bad_request("Request must contain a 'file' in the form."))
       }
 
       # Don't rely on the filename to infer the package name and version.
@@ -120,13 +119,12 @@ router <- function(repo) {
       })
       if (inherits(pkg, "try-error")) {
         # TODO: Log the error.
-        return(bad_request())
+        return(bad_request("Invalid package bundle."))
       }
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
       if (basename(location) != bundle) {
-        # TODO: Use a better message here.
-        return(bad_request())
+        return(bad_request("URI does not match the upload contents."))
       }
 
       res <- if (file.exists(location)) {
@@ -169,8 +167,8 @@ not_found <- function() {
   ))
 }
 
-bad_request <- function() {
-  list(status = 400L, body = "Invalid package bundle.", headers = list(
+bad_request <- function(msg) {
+  list(status = 400L, body = msg, headers = list(
     "Content-Type" = "text/plain; charset=utf-8"
   ))
 }
