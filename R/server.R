@@ -1,0 +1,124 @@
+#' Serve a CRAN-like Package Repository
+#'
+#' Starts a local web server to serve packages from the repository.
+#'
+#' @param repo The location of the package repository.
+#' @param port The port to run the server on.
+#'
+#' @export
+serve <- function(repo, port = 8000) {
+  if (!requireNamespace("httpuv", quietly = TRUE)) {
+    stop("The 'httpuv' package is required to run the server.")
+  }
+  httpuv::runServer("127.0.0.1", port, list(
+    call = router(repo)
+  ))
+}
+
+router <- function(repo) {
+  function(req) {
+    path <- httpuv::decodeURIComponent(req$PATH_INFO)
+    Encoding(path) <- "UTF-8"
+
+    if (path == "/_ping") {
+      return(ping())
+    }
+
+    # Here's a nickel kid, use a real web server instead.
+    if (req$REQUEST_METHOD == "GET" && grepl("^/src", path)) {
+      location <- file.path(repo, sub("^/", "", path))
+      res <- if (file.exists(location)) {
+        size <- file.info(location)[, "size"]
+        con <- file(location, "rb", raw = TRUE)
+        on.exit(close(con))
+        body <- readBin(con, "raw", n = size)
+        list(
+          status = 200L,
+          headers = list(
+            "Content-Type" = mime::guess_type(location),
+            "Content-Length" = size
+          ),
+          body = body
+        )
+      } else {
+        not_found()
+      }
+      return(res)
+    }
+
+    if (req$REQUEST_METHOD == "POST" && path == "/") {
+      parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
+      if (!"file" %in% names(parsed)) {
+        return(bad_request())
+      }
+
+      # Don't rely on the filename to infer the package name and version.
+      # Extract it from the archive instead.
+      temp_file <- tempfile(fileext = ".tar.gz")
+      pkg <- try({
+        con <- file(temp_file, open = "wb", raw = TRUE)
+        on.exit(close(con))
+        writeBin(parsed$file$value, con)
+        # Make sure we wrote the whole file (even if it is large) before we
+        # attempt to extract metadata from it.
+        flush(con)
+        extract_description(temp_file, fields = c("Package", "Version"))
+      })
+      if (inherits(pkg, "try-error")) {
+        # TODO: Log the error.
+        return(bad_request())
+      }
+
+      bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
+      location <- file.path(contrib.url(repo, type = "source"), bundle)
+      res <- if (file.exists(location)) {
+        list(
+          status = 403L,
+          headers = list(
+            "Content-Type" = "text/plain; charset=utf-8",
+            "Location" = paste0("/src/contrib/", bundle)
+          ),
+          body = "Package already exists on the server. Use PUT to replace it."
+        )
+      } else {
+        # TODO: Actually copy the file to the repository.
+        list(
+          status = 200L,
+          headers = list(
+            "Content-Type" = "text/plain; charset=utf-8",
+            "Location" = paste0("/src/contrib/", bundle)
+          ),
+          body = ""
+        )
+      }
+      return(res)
+    }
+
+    not_found()
+  }
+}
+
+ping <- function() {
+  list(status = 200L, body = "", headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
+not_found <- function() {
+  list(status = 404L, body = "", headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
+bad_request <- function() {
+  list(status = 400L, body = "Invalid package bundle.", headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
+date <- function() {
+  format.POSIXlt(
+    as.POSIXlt(Sys.time(), tz = "GMT"), format = "%a, %d %b %Y %H:%M:%S %Z",
+    usetz = FALSE
+  )
+}
