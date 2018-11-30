@@ -151,6 +151,25 @@ router <- function(repo) {
       return(res)
     }
 
+    if (req$REQUEST_METHOD == "DELETE" && grepl("^/src", path)) {
+      location <- file.path(repo, sub("^/", "", path))
+
+      res <- if (file.exists(location)) {
+        # TODO: Decide how to implement this.
+        list(
+          status = 403L,
+          headers = list(
+            "Content-Type" = "text/plain; charset=utf-8",
+            "Location" = path
+          ),
+          body = "Package deletion is not permitted."
+        )
+      } else {
+        not_found()
+      }
+      return(res)
+    }
+
     not_found()
   }
 }
