@@ -94,6 +94,65 @@ router <- function(repo) {
       return(res)
     }
 
+    if (req$REQUEST_METHOD == "PUT" && grepl("^/src", path)) {
+      location <- file.path(repo, sub("^/", "", path))
+      if (dirname(location) != contrib.url(repo, type = "source")) {
+        # TODO: Use a better message here.
+        return(bad_request())
+      }
+
+      parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
+      if (!"file" %in% names(parsed)) {
+        return(bad_request())
+      }
+
+      # Don't rely on the filename to infer the package name and version.
+      # Extract it from the archive instead.
+      temp_file <- tempfile(fileext = ".tar.gz")
+      pkg <- try({
+        con <- file(temp_file, open = "wb", raw = TRUE)
+        on.exit(close(con))
+        writeBin(parsed$file$value, con)
+        # Make sure we wrote the whole file (even if it is large) before we
+        # attempt to extract metadata from it.
+        flush(con)
+        extract_description(temp_file, fields = c("Package", "Version"))
+      })
+      if (inherits(pkg, "try-error")) {
+        # TODO: Log the error.
+        return(bad_request())
+      }
+
+      bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
+      if (basename(location) != bundle) {
+        # TODO: Use a better message here.
+        return(bad_request())
+      }
+
+      res <- if (file.exists(location)) {
+        # TODO: Actually copy the file to the repository.
+        list(
+          status = 200L,
+          headers = list(
+            "Content-Type" = "text/plain; charset=utf-8",
+            "Location" = paste0("/src/contrib/", bundle)
+          ),
+          body = ""
+        )
+      } else {
+        # TODO: Actually copy the file to the repository.
+        list(
+          status = 201L,
+          headers = list(
+            "Content-Type" = "text/plain; charset=utf-8",
+            "Location" = paste0("/src/contrib/", bundle)
+          ),
+          body = ""
+        )
+      }
+      return(res)
+    }
+
     not_found()
   }
 }
