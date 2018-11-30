@@ -73,7 +73,7 @@ router <- function(repo) {
       location <- file.path(contrib.url(repo, type = "source"), bundle)
       res <- if (file.exists(location)) {
         list(
-          status = 403L,
+          status = 409L,
           headers = list(
             "Content-Type" = "text/plain; charset=utf-8",
             "Location" = paste0("/src/contrib/", bundle)
@@ -83,7 +83,7 @@ router <- function(repo) {
       } else {
         # TODO: Actually copy the file to the repository.
         list(
-          status = 200L,
+          status = 201L,
           headers = list(
             "Content-Type" = "text/plain; charset=utf-8",
             "Location" = paste0("/src/contrib/", bundle)
