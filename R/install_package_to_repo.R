@@ -53,8 +53,10 @@ install_package_to_repo <-
     
     # If repo is at Github, check that the package is available, then pull it
     if(any(isGithub)) {
-      if (!requireNamespace("git2r", quietly = TRUE) | !requireNamespace("httr", quietly = TRUE)) {
-        warning('git2r AND/OR httr is missing, cannot install from git repos')
+      if (!requireNamespace("git2r", quietly = TRUE) ||
+          !requireNamespace("httr", quietly = TRUE) ||
+          !requireNamespace("devtools", quietly = TRUE)) {
+        stop("The 'git2r', 'httr', and 'devtools' packages are required to install from GitHub")
       } else {
         # Check location to see if file is present
         
@@ -90,8 +92,9 @@ install_package_to_repo <-
       
       # Support building from non-github gits
     } else if(isGit) {
-      if (!requireNamespace("git2r", quietly = TRUE)) {
-        stop('git2r is missing, cannot install from git')
+      if (!requireNamespace("git2r", quietly = TRUE) ||
+          !requireNamespace("devtools", quietly = TRUE)) {
+        stop("The 'git2r' and 'devtools' packages are required to install from git")
       } else {
         # Check SSL
         isSecure <- check_base_address(pkg,'https://')
