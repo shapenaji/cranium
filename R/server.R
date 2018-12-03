@@ -46,6 +46,27 @@ router <- function(repo) {
       return(res)
     }
 
+    # Clients can use HEAD to check the existence of a package.
+    if (req$REQUEST_METHOD == "HEAD" && grepl("^/src", path)) {
+      location <- file.path(repo, sub("^/", "", path))
+      res <- if (file.exists(location)) {
+        size <- file.info(location)[, "size"]
+        list(
+          status = 200L,
+          headers = list(
+            "Content-Type" = mime::guess_type(location),
+            # Send the real content length for HEAD requests.
+            # See: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.13
+            "Content-Length" = size
+          ),
+          body = raw(0)
+        )
+      } else {
+        not_found()
+      }
+      return(res)
+    }
+
     if (req$REQUEST_METHOD == "POST" && path == "/") {
       parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
       if (!"file" %in% names(parsed)) {
