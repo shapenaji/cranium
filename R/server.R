@@ -6,9 +6,13 @@
 #' @param port The port to run the server on.
 #'
 #' @export
-serve <- function(repo, port = 8000) {
-  if (!requireNamespace("httpuv", quietly = TRUE)) {
-    stop("The 'httpuv' package is required to run the server.")
+serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
+                  ...) {
+  if (!requireNamespace("httpuv", quietly = TRUE) ||
+      !requireNamespace("webutils", quietly = TRUE) ||
+      !requireNamespace("mime", quietly = TRUE)) {
+    stop(paste0("The 'httpuv', 'webutils', and 'mime' packages are required ",
+                "to run the cranium server."))
   }
   httpuv::runServer("127.0.0.1", port, list(
     call = router(repo)

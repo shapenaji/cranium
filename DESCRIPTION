@@ -20,6 +20,7 @@ Suggests:
     git2r,
     httr,
     httpuv,
+    mime,
     openssl,
     getPass,
     testthat,
