@@ -14,18 +14,49 @@ serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
     stop(paste0("The 'httpuv', 'webutils', and 'mime' packages are required ",
                 "to run the cranium server."))
   }
-  httpuv::runServer("127.0.0.1", port, list(
-    call = router(repo)
+
+  env <- new.env(FALSE, size = 1L)
+
+  # Keep the package index in memory.
+  index_path <- file.path(contrib.url(repo, type = "source"), "PACKAGES.rds")
+  env$index <- readRDS(index_path)
+  on.exit({
+    message("Updating the on-disk repository index.")
+    saveRDS(env$index, index_path, compress = "xz")
+  })
+
+  httpuv::runServer(host, port, list(
+    call = router(repo, env)
   ))
 }
 
-router <- function(repo) {
+router <- function(repo, env) {
   function(req) {
     path <- httpuv::decodeURIComponent(req$PATH_INFO)
     Encoding(path) <- "UTF-8"
 
     if (path == "/_ping") {
       return(ping())
+    }
+
+    # Serve the index out of memory so that we can be sure it is always up-to-
+    # date vis-a-vis this server.
+    if (req$REQUEST_METHOD %in% c("GET", "HEAD") &&
+        path == "/src/contrib/PACKAGES.rds") {
+      if (req$REQUEST_METHOD == "GET") {
+        # NOTE: We're not using the traditional compression here.
+        body <- serialize(env$index, connection = NULL)
+      } else {
+        body <- raw(0)
+      }
+      return(list(
+        status = 200L,
+        headers = list(
+          "Content-Type" = "application/octet-stream",
+          "Content-Length" = length(body)
+        ),
+        body = body
+      ))
     }
 
     # Here's a nickel kid, use a real web server instead.
