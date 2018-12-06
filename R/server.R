@@ -59,6 +59,12 @@ router <- function(repo, env) {
       ))
     }
 
+    # No support for pre-3.0 clients, i.e. raw PACKAGES or PACKAGES.gz files.
+    if (req$REQUEST_METHOD %in% c("GET", "HEAD") &&
+        grepl("src/contrib/PACKAGES(|.gz)$", path)) {
+      return(bad_request("Pre-3.0 clients are not supported."))
+    }
+
     # Here's a nickel kid, use a real web server instead.
     if (req$REQUEST_METHOD %in% c("GET", "HEAD") && grepl("^/src", path)) {
       location <- file.path(repo, sub("^/", "", path))
