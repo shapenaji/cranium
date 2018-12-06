@@ -60,32 +60,17 @@ router <- function(repo, env) {
     }
 
     # Here's a nickel kid, use a real web server instead.
-    if (req$REQUEST_METHOD == "GET" && grepl("^/src", path)) {
+    if (req$REQUEST_METHOD %in% c("GET", "HEAD") && grepl("^/src", path)) {
       location <- file.path(repo, sub("^/", "", path))
       res <- if (file.exists(location)) {
         size <- file.info(location)[, "size"]
-        con <- file(location, "rb", raw = TRUE)
-        on.exit(close(con))
-        body <- readBin(con, "raw", n = size)
-        list(
-          status = 200L,
-          headers = list(
-            "Content-Type" = mime::guess_type(location),
-            "Content-Length" = size
-          ),
-          body = body
-        )
-      } else {
-        not_found()
-      }
-      return(res)
-    }
-
-    # Clients can use HEAD to check the existence of a package.
-    if (req$REQUEST_METHOD == "HEAD" && grepl("^/src", path)) {
-      location <- file.path(repo, sub("^/", "", path))
-      res <- if (file.exists(location)) {
-        size <- file.info(location)[, "size"]
+        if (req$REQUEST_METHOD == "GET") {
+          con <- file(location, "rb", raw = TRUE)
+          on.exit(close(con))
+          body <- readBin(con, "raw", n = size)
+        } else {
+          body <- raw(0)
+        }
         list(
           status = 200L,
           headers = list(
@@ -94,7 +79,7 @@ router <- function(repo, env) {
             # See: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.13
             "Content-Length" = size
           ),
-          body = raw(0)
+          body = body
         )
       } else {
         not_found()
