@@ -23,14 +23,30 @@ serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
   config <- list()
   env <- new.env(FALSE, size = 1L)
 
-  # Keep the package index in memory.
-  index_path <- file.path(contrib.url(repo, type = "source"), "PACKAGES.rds")
-  env$index <- readRDS(index_path)
   config$use_archive <- args$use_archive %||% TRUE
   config$use_hardlinks <- args$use_hardlinks %||% FALSE
   config$latest_only <- args$latest_only %||% FALSE
   config$fields <- args$fields %||% required_fields
   config$repo_name <- repo_name
+
+  # Keep the package index in memory, loading it from the file if present and
+  # using an empty index otherwise.
+
+  url <- contrib.url(repo, type = "source")
+  if (!dir.exists(url)) {
+    dir.create(url, recursive = TRUE, showWarnings = FALSE)
+  }
+
+  index_path <- file.path(url, "PACKAGES.rds")
+  if (!file.exists(index_path)) {
+    empty <- matrix(nrow = 0, ncol = length(config$fields))
+    colnames(empty) <- config$fields
+    env$index <- empty
+    message("Created an empty repository index.")
+  } else {
+    env$index <- readRDS(index_path)
+    message("Using the existing repository contents.")
+  }
 
   on.exit({
     message("Updating the on-disk repository index.")
