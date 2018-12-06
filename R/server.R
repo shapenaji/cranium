@@ -3,7 +3,11 @@
 #' Starts a local web server to serve packages from the repository.
 #'
 #' @param repo The location of the package repository.
+#' @param repo_name The name of the repository, written to \code{DESCRIPTION}
+#'   files.
+#' @param host An IPv4 address owned by the server. Defaults to localhost.
 #' @param port The port to run the server on.
+#' @param ... Further arguments passed on to \code{\link{write_modpac}}.
 #'
 #' @export
 serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
@@ -15,22 +19,30 @@ serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
                 "to run the cranium server."))
   }
 
+  args <- list(...)
+  config <- list()
   env <- new.env(FALSE, size = 1L)
 
   # Keep the package index in memory.
   index_path <- file.path(contrib.url(repo, type = "source"), "PACKAGES.rds")
   env$index <- readRDS(index_path)
+  config$use_archive <- args$use_archive %||% TRUE
+  config$use_hardlinks <- args$use_hardlinks %||% FALSE
+  config$latest_only <- args$latest_only %||% FALSE
+  config$fields <- args$fields %||% required_fields
+  config$repo_name <- repo_name
+
   on.exit({
     message("Updating the on-disk repository index.")
     saveRDS(env$index, index_path, compress = "xz")
   })
 
   httpuv::runServer(host, port, list(
-    call = router(repo, env)
+    call = router(repo, config, env)
   ))
 }
 
-router <- function(repo, env) {
+router <- function(repo, config, env) {
   function(req) {
     path <- httpuv::decodeURIComponent(req$PATH_INFO)
     Encoding(path) <- "UTF-8"
@@ -245,3 +257,12 @@ date <- function() {
     usetz = FALSE
   )
 }
+
+`%||%` <- function(lhs, rhs) if (!is.null(lhs)) lhs else rhs
+
+# From tools:::.get_standard_repository_db_fields().
+required_fields <- c(
+  "Package", "Version", "Priority", "Depends", "Imports", "LinkingTo",
+  "Suggests", "Enhances", "License", "License_is_FOSS", "License_restricts_use",
+  "OS_type", "Archs", "MD5sum", "NeedsCompilation"
+)
