@@ -31,10 +31,10 @@ serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
   config <- list()
   env <- new.env(FALSE, size = 1L)
 
-  config$use_archive <- args$use_archive %||% TRUE
-  config$use_hardlinks <- args$use_hardlinks %||% FALSE
-  config$latest_only <- args$latest_only %||% FALSE
-  config$fields <- args$fields %||% required_fields
+  config$use_archive <-   args[["use_archive"]]   %||% Sys.getenv("CRANIUM_USE_ARCHIVE",TRUE)
+  config$use_hardlinks <- args[["use_hardlinks"]] %||% Sys.getenv("CRANIUM_USE_HARDLINKS", FALSE)
+  config$latest_only <-   args[["latest_only"]]   %||% Sys.getenv("CRANIUM_LATEST_ONLY", FALSE)
+  config$fields <-        args[["fields"]]        %||% Sys.getenv("CRANIUM_REPO_FIELDS", required_fields)
   config$repo_name <- repo_name
 
   # Keep the package index in memory, loading it from the file if present and
@@ -136,7 +136,7 @@ router <- function(repo, config, env) {
       return(res)
     }
 
-    if (req$REQUEST_METHOD == "POST" && path == "/") {
+    if (req$REQUEST_METHOD == "POST" && path == "/publish") {
       parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
       if (!"file" %in% names(parsed)) {
         return(bad_request("Request must contain a 'file' in the form."))
@@ -157,6 +157,14 @@ router <- function(repo, config, env) {
       if (inherits(pkg, "try-error")) {
         # TODO: Log the error.
         return(bad_request("Invalid package bundle."))
+      } 
+      
+      if (is.na(pkg$Package) || is.na(pkg$Version)) {
+        return(invalid_package("DESCRIPTION is malformed"))
+      }
+      
+      if (!is_safe_string(pkg$Package) || !is_safe_string(pkg$Version)) {
+        return(im_a_teapot("DESCRIPTION is malformed"))  
       }
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
@@ -171,7 +179,10 @@ router <- function(repo, config, env) {
           body = "Package already exists on the server. Use PUT to replace it."
         )
       } else {
-        # TODO: Actually copy the file to the repository.
+        # Add Repository to description
+        modify_description('Repository', repo_name, temp_file)
+        file.copy(temp_file, file.path(contrib.url(repo, 'source'), location), overwrite = FALSE)
+        write_modpac(repo)
         list(
           status = 201L,
           headers = list(
@@ -212,6 +223,10 @@ router <- function(repo, config, env) {
         return(bad_request("Invalid package bundle."))
       }
 
+      if (is.na(pkg$Package) || is.na(pkg$Version)) {
+        return(invalid_package("DESCRIPTION is malformed"))
+      }
+      
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
       if (basename(location) != bundle) {
         return(bad_request("URI does not match the upload contents."))
@@ -228,7 +243,9 @@ router <- function(repo, config, env) {
           body = ""
         )
       } else {
-        # TODO: Actually copy the file to the repository.
+        modify_description('Repository', repo_name, temp_file)
+        file.copy(temp_file, file.path(contrib.url(repo, 'source'), location), overwrite = TRUE)
+        write_modpac(repo)
         list(
           status = 201L,
           headers = list(
@@ -241,19 +258,42 @@ router <- function(repo, config, env) {
       return(res)
     }
 
-    if (req$REQUEST_METHOD == "DELETE" && grepl("^/src", path)) {
-      location <- file.path(repo, sub("^/", "", path))
+    # If they want to delete the Archive, allow for permanent deletion
+      
+    if (req$REQUEST_METHOD == "DELETE" && grepl("^/src/contrib/", path)) {
+      if (!is_safe_string(basename(path))) {
+        bad_request('Badly formed URL')
+      }
+      
+      # Safer
+      location <- file.path(contrib.url(repo), basename(path))
+      # Unsafe, this allows tricky paths
+      #location <- file.path(repo, sub("^/", "", path))
 
       res <- if (file.exists(location)) {
-        # TODO: Decide how to implement this.
-        list(
-          status = 403L,
-          headers = list(
-            "Content-Type" = "text/plain; charset=utf-8",
-            "Location" = path
-          ),
-          body = "Package deletion is not permitted."
-        )
+        if (req$REQUEST_METHOD == "DELETE" && grepl(paste0('^',file.path("/src/contrib/Archive")), path)) {
+          # For now, don't allow deletes from Archive
+          # TODO allow deletes from Archive
+          list(
+            status = 403L,
+            headers = list(
+              "Content-Type" = "text/plain; charset=utf-8",
+              "Location" = path
+            ),
+            body = "Package deletion from Archive is not permitted."
+          )
+        } else {
+          archive_pkg(location)
+          ist(
+            status = 201L,
+            headers = list(
+              "Content-Type" = "text/plain; charset=utf-8",
+              "Location" = path
+            ),
+            body = "Archived Package."
+          )
+        }
+        
       } else {
         not_found()
       }
@@ -282,6 +322,20 @@ bad_request <- function(msg) {
   ))
 }
 
+# https://tools.ietf.org/html/rfc4918
+# Syntactically correct but semantically invalid
+invalid_package <- function(msg) {
+  list(status = 422L, body = msg, headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
+im_a_teapot <- function(msg) {
+  list(status = 418L, body = msg, headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
 date <- function() {
   format.POSIXlt(
     as.POSIXlt(Sys.time(), tz = "GMT"), format = "%a, %d %b %Y %H:%M:%S %Z",
@@ -297,3 +351,8 @@ required_fields <- c(
   "Suggests", "Enhances", "License", "License_is_FOSS", "License_restricts_use",
   "OS_type", "Archs", "MD5sum", "NeedsCompilation"
 )
+
+is_safe_string <- function(x) {
+  test <- charToRaw("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.")
+  all(charToRaw(x) %in% test)
+}
