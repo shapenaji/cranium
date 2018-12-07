@@ -162,6 +162,8 @@ router <- function(repo, config, env) {
       if (is.na(pkg$Package) || is.na(pkg$Version)) {
         return(invalid_package("DESCRIPTION is malformed"))
       }
+      
+      if ()
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
       location <- file.path(contrib.url(repo, type = "source"), bundle)
@@ -175,7 +177,10 @@ router <- function(repo, config, env) {
           body = "Package already exists on the server. Use PUT to replace it."
         )
       } else {
-        # TODO: Actually copy the file to the repository.
+        # Add Repository to description
+        modify_description('Repository', repo_name, temp_file)
+        file.copy(temp_file, file.path(contrib.url(repo, 'source'), location), overwrite = FALSE)
+        write_modpac(repo)
         list(
           status = 201L,
           headers = list(
@@ -319,3 +324,8 @@ required_fields <- c(
   "Suggests", "Enhances", "License", "License_is_FOSS", "License_restricts_use",
   "OS_type", "Archs", "MD5sum", "NeedsCompilation"
 )
+
+is_safe_string <- function(x) {
+  test <- charToRaw("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.")
+  all(charToRaw(x) %in% test)
+}
