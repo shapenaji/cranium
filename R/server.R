@@ -159,7 +159,7 @@ router <- function(repo, config, env) {
         return(bad_request("Invalid package bundle."))
       } 
       
-      if (is.na(pkg$Package) | is.na(pkg$Version)) {
+      if (is.na(pkg$Package) || is.na(pkg$Version)) {
         return(invalid_package("DESCRIPTION is malformed"))
       }
 
@@ -216,6 +216,10 @@ router <- function(repo, config, env) {
         return(bad_request("Invalid package bundle."))
       }
 
+      if (is.na(pkg$Package) || is.na(pkg$Version)) {
+        return(invalid_package("DESCRIPTION is malformed"))
+      }
+      
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
       if (basename(location) != bundle) {
         return(bad_request("URI does not match the upload contents."))
