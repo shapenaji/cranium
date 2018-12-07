@@ -136,7 +136,7 @@ router <- function(repo, config, env) {
       return(res)
     }
 
-    if (req$REQUEST_METHOD == "POST" && path == "/") {
+    if (req$REQUEST_METHOD == "POST" && path == "/publish") {
       parsed <- webutils::parse_http(req$rook.input$read(), req$CONTENT_TYPE)
       if (!"file" %in% names(parsed)) {
         return(bad_request("Request must contain a 'file' in the form."))
