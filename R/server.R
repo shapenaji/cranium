@@ -258,19 +258,42 @@ router <- function(repo, config, env) {
       return(res)
     }
 
-    if (req$REQUEST_METHOD == "DELETE" && grepl("^/src", path)) {
-      location <- file.path(repo, sub("^/", "", path))
+    # If they want to delete the Archive, allow for permanent deletion
+      
+    if (req$REQUEST_METHOD == "DELETE" && grepl("^/src/contrib/", path)) {
+      if (!is_safe_string(basename(path))) {
+        bad_request('Badly formed URL')
+      }
+      
+      # Safer
+      location <- file.path(contrib.url(repo), basename(path))
+      # Unsafe, this allows tricky paths
+      #location <- file.path(repo, sub("^/", "", path))
 
       res <- if (file.exists(location)) {
-        # TODO: Decide how to implement this.
-        list(
-          status = 403L,
-          headers = list(
-            "Content-Type" = "text/plain; charset=utf-8",
-            "Location" = path
-          ),
-          body = "Package deletion is not permitted."
-        )
+        if (req$REQUEST_METHOD == "DELETE" && grepl(paste0('^',file.path("/src/contrib/Archive")), path)) {
+          # For now, don't allow deletes from Archive
+          # TODO allow deletes from Archive
+          list(
+            status = 403L,
+            headers = list(
+              "Content-Type" = "text/plain; charset=utf-8",
+              "Location" = path
+            ),
+            body = "Package deletion from Archive is not permitted."
+          )
+        } else {
+          archive_pkg(location)
+          ist(
+            status = 201L,
+            headers = list(
+              "Content-Type" = "text/plain; charset=utf-8",
+              "Location" = path
+            ),
+            body = "Archived Package."
+          )
+        }
+        
       } else {
         not_found()
       }
