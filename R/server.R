@@ -163,7 +163,9 @@ router <- function(repo, config, env) {
         return(invalid_package("DESCRIPTION is malformed"))
       }
       
-      if ()
+      if (!is_safe_string(pkg$Package) || !is_safe_string(pkg$Version)) {
+        return(im_a_teapot("DESCRIPTION is malformed"))  
+      }
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
       location <- file.path(contrib.url(repo, type = "source"), bundle)

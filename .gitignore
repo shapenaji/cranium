@@ -11,4 +11,5 @@ css/
 *.csv
 ^\.Rprofile
 ^\.Rhistory
+*.swp
 
