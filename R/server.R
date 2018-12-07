@@ -7,11 +7,19 @@
 #'   files.
 #' @param host An IPv4 address owned by the server. Defaults to localhost.
 #' @param port The port to run the server on.
+#' @param detach Whether the server should run in the foreground or return
+#'   immediately and run in the background.
 #' @param ... Further arguments passed on to \code{\link{write_modpac}}.
+#'
+#' @return
+#'
+#' When \code{detach = TRUE}, this function returns a handle that can be passed
+#' to \code{\link{stopServer}}. Otherwise it will not return at all, and must
+#' be interrupted from the console.
 #'
 #' @export
 serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
-                  ...) {
+                  detach = FALSE, ...) {
   if (!requireNamespace("httpuv", quietly = TRUE) ||
       !requireNamespace("webutils", quietly = TRUE) ||
       !requireNamespace("mime", quietly = TRUE)) {
@@ -48,14 +56,21 @@ serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
     message("Using the existing repository contents.")
   }
 
-  on.exit({
-    message("Updating the on-disk repository index.")
-    saveRDS(env$index, index_path, compress = "xz")
-  })
+  if (!detach) {
+    # FIXME: This approach works with runServer but not with startServer.
+    on.exit({
+      message("Updating the on-disk repository index.")
+      saveRDS(env$index, index_path, compress = "xz")
+    })
 
-  httpuv::runServer(host, port, list(
-    call = router(repo, config, env)
-  ))
+    httpuv::runServer(host, port, list(
+      call = router(repo, config, env)
+    ))
+  } else {
+    httpuv::startServer(host, port, list(
+      call = router(repo, config, env)
+    ))
+  }
 }
 
 router <- function(repo, config, env) {
