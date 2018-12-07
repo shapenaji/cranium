@@ -1,12 +1,12 @@
-^.*\.Rproj$
-^\.Rproj\.user$
+*\.Rproj
+\.Rproj\.user
 css/
 \.gitignore
 \.git/
 ^README
 ^\.Rprofile
 ^\.Rhistory
-\.tar\.gz
+.git
 Dockerfile
 .dockerignore
-entrypoint
+*\.tar\.gz
