@@ -159,8 +159,8 @@ router <- function(repo, config, env) {
         return(bad_request("Invalid package bundle."))
       } 
       
-      if(is.na(pkg$Package) | is.na(pkg$Version)) {
-        return()
+      if (is.na(pkg$Package) | is.na(pkg$Version)) {
+        return(invalid_package("DESCRIPTION is malformed"))
       }
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
