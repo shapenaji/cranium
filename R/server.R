@@ -157,6 +157,10 @@ router <- function(repo, config, env) {
       if (inherits(pkg, "try-error")) {
         # TODO: Log the error.
         return(bad_request("Invalid package bundle."))
+      } 
+      
+      if(is.na(pkg$Package) | is.na(pkg$Version)) {
+        return()
       }
 
       bundle <- sprintf("%s_%s.tar.gz", pkg$Package, pkg$Version)
@@ -278,6 +282,20 @@ not_found <- function() {
 
 bad_request <- function(msg) {
   list(status = 400L, body = msg, headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
+# https://tools.ietf.org/html/rfc4918
+# Syntactically correct but semantically invalid
+invalid_package <- function(msg) {
+  list(status = 422L, body = msg, headers = list(
+    "Content-Type" = "text/plain; charset=utf-8"
+  ))
+}
+
+im_a_teapot <- function(msg) {
+  list(status = 418L, body = msg, headers = list(
     "Content-Type" = "text/plain; charset=utf-8"
   ))
 }
