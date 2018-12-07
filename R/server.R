@@ -243,7 +243,9 @@ router <- function(repo, config, env) {
           body = ""
         )
       } else {
-        # TODO: Actually copy the file to the repository.
+        modify_description('Repository', repo_name, temp_file)
+        file.copy(temp_file, file.path(contrib.url(repo, 'source'), location), overwrite = TRUE)
+        write_modpac(repo)
         list(
           status = 201L,
           headers = list(
