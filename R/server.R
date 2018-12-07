@@ -31,10 +31,10 @@ serve <- function(repo, repo_name = "Cranium", host = "127.0.0.1", port = 8000,
   config <- list()
   env <- new.env(FALSE, size = 1L)
 
-  config$use_archive <- args$use_archive %||% TRUE
-  config$use_hardlinks <- args$use_hardlinks %||% FALSE
-  config$latest_only <- args$latest_only %||% FALSE
-  config$fields <- args$fields %||% required_fields
+  config$use_archive <-  args$use_archive    %||% Sys.getenv("CRANIUM_USE_ARCHIVE",TRUE)
+  config$use_hardlinks <- args$use_hardlinks %||% Sys.getenv("CRANIUM_USE_HARDLINKS", FALSE)
+  config$latest_only <- args$latest_only     %||% Sys.getenv("CRANIUM_LATEST_ONLY", FALSE)
+  config$fields <- args$fields               %||% Sys.getenv("CRANIUM_REPO_FIELDS", required_fields)
   config$repo_name <- repo_name
 
   # Keep the package index in memory, loading it from the file if present and
