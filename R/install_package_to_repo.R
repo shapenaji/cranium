@@ -78,7 +78,13 @@ install_package_to_repo <-
           # if repo_name set, rebuild
           if(!is.null(repo_name)) {
             message('Adding repo_name and rebuilding')
-            modify_description('Repository', repo_name, targz)
+            modify_description(
+              field = c("Repository", "Date/Publication"),
+              value = c(
+                repo_name, format.POSIXct(Sys.time(), usetz = TRUE)
+              ),
+              file = targz
+            )
           }
           
           
@@ -120,7 +126,13 @@ install_package_to_repo <-
           # if repo_name set, rebuild
           if(!is.null(repo_name)) {
             message('Adding repo_name and rebuilding')
-            modify_description('Repository', repo_name, targz)
+            modify_description(
+              field = c("Repository", "Date/Publication"),
+              value = c(
+                repo_name, format.POSIXct(Sys.time(), usetz = TRUE)
+              ),
+              file = targz
+            )
           }
           
           unlink(fileloc, recursive = TRUE)
@@ -155,7 +167,13 @@ install_package_to_repo <-
           # if repo_name set, rebuild
           if(!is.null(repo_name)) {
             message('Adding repo_name and rebuilding')
-            modify_description('Repository', repo_name, targz)
+            modify_description(
+              field = c("Repository", "Date/Publication"),
+              value = c(
+                repo_name, format.POSIXct(Sys.time(), usetz = TRUE)
+              ),
+              file = targz
+            )
           }
         }
       }
@@ -167,7 +185,13 @@ install_package_to_repo <-
       
       # Modify Description to use Repo
       if(!is.null(repo_name)) {
-        modify_description('Repository', repo_name, pkg)
+        modify_description(
+          field = c("Repository", "Date/Publication"),
+          value = c(
+            repo_name, format.POSIXct(Sys.time(), usetz = TRUE)
+          ),
+          file = pkg
+        )
       }
       # Copy file from original location to repo
       out <- 
@@ -190,7 +214,13 @@ install_package_to_repo <-
       
       # Modify Description to use Repo
       if(!is.null(repo_name)) {
-        modify_description('Repository', repo_name, out[,2])
+        modify_description(
+          field = c("Repository", "Date/Publication"),
+          value = c(
+            repo_name, format.POSIXct(Sys.time(), usetz = TRUE)
+          ),
+          file = out[,2]
+        )
       }
       
       print(out)
