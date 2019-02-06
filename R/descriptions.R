@@ -129,26 +129,38 @@ modify_descriptions <- function(field, value) {
   write_modpac(get_repo_location())
 }
 
-#' Modify description of a single zipped package
+#' Modify the \code{DESCRIPTION} of a Built Package
 #'
-#' @param field example: Repository
-#' @param value example: internal
-#' @param file example: /path/to/cranium_0.3.0.tar.gz 
+#' This function allows you to modify package metadata inside of an existing
+#' package bundle. Some effort is made to do this as efficiently as possible.
 #'
-#' @return A new available packages table
+#' @param field A vector of \code{DESCRIPTION} file fields, e.g.
+#'   \code{"Repository"}.
+#' @param value A vector of string values these fields should take.
+#' @param file A package bundle, e.g. \code{"cranium_1.0.0.tar.gz"}.
+#'
+#' @return
+#'
+#' \code{TRUE} if the bundle was modified correctly and \code{FALSE} otherwise.
+#'
 #' @export
 modify_description <- function(field, value, file) {
   if (!grepl("\\.tar\\.gz$", file)) {
     stop("'file' must be a package bundle.")
   }
+  stopifnot(length(field) == length(value))
 
-  exdir <- file.path(tempdir(), "extracted", noEXT(file))
+  exdir <- file.path(
+    tempdir(), "extracted", gsub("\\.tar\\.gz$", "", basename(file))
+  )
   on.exit(unlink(exdir, recursive = TRUE))
 
   # We don't want to accidentally add anything to the archive later, so be sure
   # to clean up first.
   unlink(exdir, recursive = TRUE)
-  untar(tarfile = file, exdir = exdir, compressed = "gzip", restore_times = FALSE)
+  utils::untar(
+    tarfile = file, exdir = exdir, compressed = "gzip", restore_times = TRUE
+  )
 
   pkgdir <- list.dirs(exdir, full.names = TRUE, recursive = FALSE)
 
@@ -156,7 +168,10 @@ modify_description <- function(field, value, file) {
     read.dcf(file.path(pkgdir, "DESCRIPTION"), fields = NULL),
     stringsAsFactors = FALSE
   )
-  desc[[field]] <- value
+  # Vectorized over the field-value pairs.
+  for (i in seq_along(field)) {
+    desc[[field[i]]] <- value[i]
+  }
   write.dcf(desc, file = file.path(pkgdir, "DESCRIPTION"))
 
   new_bundle <- file.path(exdir, basename(file))
@@ -164,17 +179,14 @@ modify_description <- function(field, value, file) {
   curr_dir <- getwd()
   on.exit(setwd(curr_dir))
   setwd(exdir)
-  tar(
-    basename(file),
-    files = list.dirs(),
-    compression = "gzip"
+  utils::tar(
+    basename(file), files = list.dirs(), compression = "gzip"
   )
-  # file may be a relative path
+
+  # The bundle may be a relative path, so go back to the current directory.
   setwd(curr_dir)
   on.exit()
-
-  # We want to fail if we fail to modify, not return a warning
-  stopifnot(file.rename(new_bundle, file))
+  file.rename(new_bundle, file)
 }
 
 
