@@ -139,3 +139,5 @@ addr_class <- function(x) {
   x
 }
 
+#' @importFrom utils available.packages contrib.url tar untar
+NULL

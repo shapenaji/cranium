@@ -5,7 +5,6 @@
 #'   all of them.
 #'
 #' @return a data.table/data.frame object containing Description info
-#' @importFrom data.table rbindlist
 #' @export
 #'
 #' @examples

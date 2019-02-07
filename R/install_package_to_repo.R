@@ -22,7 +22,6 @@
 #' @param fields A vector of DESCRIPTION file fields to use in the PACKAGES file.
 #'
 #' @return A Descriptions Table of the packages made available
-#' @import utils
 #' @export
 #' @examples
 #' # Install from CRAN repositories to default apache2 location
