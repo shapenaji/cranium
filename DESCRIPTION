@@ -13,7 +13,6 @@ Description: Creates a version-controlled package repository for use with instal
     does not require any special client-side software to access packages.
 Imports:
     data.table,
-    tools,
     utils
 Suggests:
     devtools,

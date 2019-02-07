@@ -132,7 +132,9 @@ write_PACKAGES_files <- function(index, dir) {
 }
 
 standardize_license <- function(license) {
-  info <- tools:::analyze_licenses(license)
+  # We want to match the internal tools:::analyze_licenses().
+  fn <- get("analyze_licenses", envir = asNamespace("tools"))
+  info <- fn(license)
   ifelse(info$is_standardizable, info$standardization, NA_character_)
 }
 

@@ -23,7 +23,6 @@
 #'
 #' @return A Descriptions Table of the packages made available
 #' @import utils
-#' @import tools
 #' @export
 #' @examples
 #' # Install from CRAN repositories to default apache2 location
