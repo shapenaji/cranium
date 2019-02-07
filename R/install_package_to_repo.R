@@ -105,7 +105,7 @@ install_package_to_repo <-
           git2r::clone(pkg,
                        local_path = fileloc,
                        credentials = 
-                         cred_user_pass(
+                         git2r::cred_user_pass(
                            readline(prompt = 'Username: '),
                            if(requireNamespace("getPass", quietly = TRUE)) {
                              getPass::getPass('Password: ', forcemask = TRUE)
@@ -140,7 +140,7 @@ install_package_to_repo <-
             pkg,
             local_path = fileloc,
             credentials = 
-              cred_user_pass(
+              git2r::cred_user_pass(
                 readline(prompt = 'Username: '),
                 if(requireNamespace("getPass", quietly = TRUE)) {
                   getPass::getPass('Password: ', forcemask = TRUE)
