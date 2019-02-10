@@ -13,10 +13,9 @@ Description: Creates a version-controlled package repository for use with instal
     does not require any special client-side software to access packages.
 Imports:
     data.table,
-    devtools,
-    tools,
     utils
 Suggests:
+    devtools,
     git2r,
     httr,
     openssl,

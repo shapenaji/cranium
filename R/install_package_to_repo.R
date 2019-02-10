@@ -22,8 +22,6 @@
 #' @param fields A vector of DESCRIPTION file fields to use in the PACKAGES file.
 #'
 #' @return A Descriptions Table of the packages made available
-#' @import utils
-#' @import tools
 #' @export
 #' @examples
 #' # Install from CRAN repositories to default apache2 location
@@ -53,8 +51,10 @@ install_package_to_repo <-
     
     # If repo is at Github, check that the package is available, then pull it
     if(any(isGithub)) {
-      if (!requireNamespace("git2r", quietly = TRUE) | !requireNamespace("httr", quietly = TRUE)) {
-        warning('git2r AND/OR httr is missing, cannot install from git repos')
+      if (!requireNamespace("git2r", quietly = TRUE) ||
+          !requireNamespace("httr", quietly = TRUE) ||
+          !requireNamespace("devtools", quietly = TRUE)) {
+        stop("The 'git2r', 'httr', and 'devtools' packages are required to install from GitHub")
       } else {
         # Check location to see if file is present
         
@@ -90,8 +90,9 @@ install_package_to_repo <-
       
       # Support building from non-github gits
     } else if(isGit) {
-      if (!requireNamespace("git2r", quietly = TRUE)) {
-        stop('git2r is missing, cannot install from git')
+      if (!requireNamespace("git2r", quietly = TRUE) ||
+          !requireNamespace("devtools", quietly = TRUE)) {
+        stop("The 'git2r' and 'devtools' packages are required to install from git")
       } else {
         # Check SSL
         isSecure <- check_base_address(pkg,'https://')
@@ -102,7 +103,7 @@ install_package_to_repo <-
           git2r::clone(pkg,
                        local_path = fileloc,
                        credentials = 
-                         cred_user_pass(
+                         git2r::cred_user_pass(
                            readline(prompt = 'Username: '),
                            if(requireNamespace("getPass", quietly = TRUE)) {
                              getPass::getPass('Password: ', forcemask = TRUE)
@@ -137,7 +138,7 @@ install_package_to_repo <-
             pkg,
             local_path = fileloc,
             credentials = 
-              cred_user_pass(
+              git2r::cred_user_pass(
                 readline(prompt = 'Username: '),
                 if(requireNamespace("getPass", quietly = TRUE)) {
                   getPass::getPass('Password: ', forcemask = TRUE)
