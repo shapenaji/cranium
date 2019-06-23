@@ -1,6 +1,8 @@
 testthat::context("test-add-package")
 
 testthat::test_that("adding package(s) works as expected", {
+  
+  skip_if(Sys.getenv('CRANIUM_TEST_PACKAGES_DIR') == '', 'CRANIUM_TEST_PACKAGES_DIR env variable is unset. No packages to test.')
   # Since removal is destructive, create a separate repo.
   repo <- dummy_repo(bundles = character(0))
   url <- contrib.url(repo, type = "source")
