@@ -16,18 +16,14 @@ install_package_to_repo <- function(pkg, repo = get_repo_location(),
     stop("Only 'source' type packages can be added at present.")
   }
 
-  contrib_url <- contrib.url(repo, type = type)
-
   # Modify Description to use Repo
   if(!is.null(repo_name)) {
     modify_description('Repository', repo_name, pkg)
   }
 
-  out <- file.copy(
-    pkg, file.path(contrib_url, basename(pkg)), overwrite = TRUE
-  )
-
-  if(!out) stop('Failed to copy.')
+  if (!add_pkg(pkg, repo = repo, type = type, overwrite = TRUE)) {
+    stop("Failed to add package bundle.")
+  }
 
   write_modpac(repo, new_pkgs = basename(pkg), ...)
 }
