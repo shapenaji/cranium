@@ -14,7 +14,8 @@ testthat::test_that("adding package(s) works as expected", {
   NAME <- sub(regex_package_tar, "\\1", basename(PKGS))
   VERSION <- sub(regex_package_tar, "\\2", basename(PKGS))
   
-  added <- add_pkg(SAMPLE_BUNDLES, repo = repo)
+  added <- add_pkg(PKGS, repo = repo)
+  
   
   # Check that the output looks correct.
   testthat::expect_true(all(added))
@@ -24,6 +25,18 @@ testthat::test_that("adding package(s) works as expected", {
   testthat::expect_equal(
     length(list.files(url, "\\.tar\\.gz$")), 2
   )
-  testthat::expect_true(all(file.exists(file.path(url, basename(PKGS)))))
+  
+  # Add all packages and overwrite
+  PKGS <- SAMPLE_BUNDLES
+  
+  # Check that overwrite changes package
+  added <- add_pkg(PKGS, repo = repo, overwrite = TRUE)
+  
+  testthat::expect_true(all(added), label = 'All bundles were overwritten')
+  
+  # Check that the total number of packages is 3
+  testthat::expect_equal(
+    length(list.files(url, "\\.tar\\.gz$")), 3
+  )
 })
 
