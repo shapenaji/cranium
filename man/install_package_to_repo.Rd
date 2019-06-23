@@ -2,46 +2,25 @@
 % Please edit documentation in R/install_package_to_repo.R
 \name{install_package_to_repo}
 \alias{install_package_to_repo}
-\title{Installs package from repo/github into repository (Not Vectorized)}
+\title{Installs a Package into a Repository}
 \usage{
-install_package_to_repo(pkg, repos = getOption("repos"),
-  repo = get_repo_location(), type = "source",
-  repo_name = get_repo_name(), fields = get_packages_fields())
+install_package_to_repo(pkg, repo = get_repo_location(),
+  type = "source", repo_name = get_repo_name(), ...)
 }
 \arguments{
-\item{pkg}{Options:
-\enumerate{
- \item a package name, (Example: 'cranium'), if using a cranium repository and multiple packages are available, versions can be selected with `_version`,
- \item a path to a package, (Example: '~/Downloads/cranium_0.2.0.tar.gz'), requires repos = NULL 
-}}
+\item{pkg}{A path to a package, e.g. \code{"cranium.tar.gz"}.}
 
-\item{repos}{Accepts several options:
-\itemize{
-\item Repos: (DEFAULT: getOption('repos')) A vector of repos that will be searched for the package
-\item Github: An address of the form: 'https://github/<accountname>/'
-\item Secure Gits: An address of the form: 'https://<path>/<to>/<repository>.git'
-\item Insecure Gits: An address of the form: 'http://<path>/<to>/<repository>.git' 
-With a STRONG warning that you should not be authenticating over http:, 
-but we understand that some networks aren't perfect. 
-\item Local Pkgs: NULL
-}
-a list of repos that will be checked for the package (getOption('repos')) OR an  OR a '}
+\item{repo}{Repository Directory (by default, this uses the repo location set with "set_repo_location")}
 
-\item{repo}{by default, the value in get_repo_location(), but this can be any repository directory}
+\item{type}{The type of the package. Only \code{"source"} is supported.}
 
-\item{type}{Which type of package, Currently: 'source' is the only one supported. Plans are to include binaries.}
+\item{repo_name}{A name to give the repo, will be used by packrat to search for sources in user's options file}
 
-\item{repo_name}{default: NULL, A name to give the repo, will be used by packrat to search for sources in user's options file}
-
-\item{fields}{A vector of DESCRIPTION file fields to use in the PACKAGES file.}
+\item{...}{Further arguments passed on to \code{\link{write_modpac}}.}
 }
 \value{
 A Descriptions Table of the packages made available
 }
 \description{
-Installs package from repo/github into repository (Not Vectorized)
-}
-\examples{
-# Install from CRAN repositories to default apache2 location
-install_package_to_repo('data.table',destdir = '/var/www/html/')
+Installs a Package into a Repository
 }
