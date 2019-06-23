@@ -70,11 +70,6 @@ get_repo_name <- function() {
   .cranium[['repo_name']]
 }
 
-# Get the base directory of a tarball
-getbasedir <- function(x) {
-  strsplit(untar(x, list = TRUE)[[1]],'/')[[1]][1]
-}
-
 # Remove extension from tar.gz
 noEXT <- function(x) {
   gsub('(^.*_[0-9]+.*?)\\.tar\\.gz$', '\\1', basename(x))
@@ -101,42 +96,6 @@ is_shortest_string <- function(z) {
 # Create a hardlink that meets requirements of download.packages
 hardlink_name <- function(Path, Version) {
   sprintf(gsub('(.*)(\\.tar\\.gz)','\\1_%s\\2',Path),Version)
-}
-
-# Checks the base address of an url against a string to see if they match
-check_base_address <- function(x,url) {
-  m = nchar(url)
-  substr(x,1,m) == url
-}
-
-# Sets attribute, by reference
-addAttr <- function(x, name, value) {
-  data.table::setattr(x, name, c(attr(x,name,exact = TRUE), value))
-}
-
-# Checks if is git
-is_git <- function(x) {
-  substr(x, y <- nchar(x) - 3, y + 3) == '.git'
-}
-
-
-
-# Defines intended location
-addr_class <- function(x) {
-  x <- copy(x)
-  
-  # Check ends
-  if(is_git(x)) addAttr(x, 'class', 'git')
-  
-  # Check known addresses
-  if(check_base_address(x, 'https://github.com')) addAttr(x, 'class', 'github')
-  
-  # Check protocols
-  if(check_base_address(x, 'https://')) addAttr(x, 'class', c('web','ssl'))
-  if(check_base_address(x, 'http://')  |
-     check_base_address(x, 'ftp://')) addAttr(x, 'class', 'web')
-  if(!inherits(x, 'web')) addAttr(x, 'class', 'local')
-  x
 }
 
 #' @importFrom utils available.packages contrib.url tar untar
