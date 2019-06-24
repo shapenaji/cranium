@@ -1,9 +1,9 @@
 context("test-description-extract_description")
 
-testthat('DESCRIPTION extraction/manipulation works', {
+testthat::test_that('DESCRIPTION extraction/manipulation works', {
   
   test_description <-
-    list(
+    data.frame(
       Type = "Package",
       Package = "PackageName",
       Title = "This is a package title",
@@ -22,17 +22,26 @@ testthat('DESCRIPTION extraction/manipulation works', {
       Author = "XXXXXXXX YYYYYYYY [aut, cre]",
       Maintainer = "XXXXXXXX YYYYYYYY <ZZZZZZZ@WWW.com>",
       Repository = "Internal",
-      `Date/Publication` = "2019-06-21 08:00:11 UTC"
+      `Date/Publication` = "2019-06-21 08:00:11 UTC",
+      stringsAsFactors = FALSE, check.names = FALSE
     )
   
-  dir <- tempdir()
-  file <- file.path(dir, 'DESC')
-  
+  dir <- tempfile("description-test")
+  dir.create(file.path(dir, "pkgname"), showWarnings = FALSE, recursive = TRUE)
+  file <- file.path(dir, "pkgname", "DESCRIPTION")
+
   write.dcf(test_description, file)
-  
-  targz <- tempfile(fileext = '.tar.gz')
-  tar(targz, files = file, compression = 'gz')
-  
+  testthat::expect_true(file.exists(file))
+
+  # To mimic R CMD build, we need to operate tar() on the current directory.
+  targz <- tempfile("description-test", fileext = ".tar.gz")
+  curr_dir <- getwd()
+  on.exit(setwd(curr_dir))
+  setwd(dir)
+  tar(targz, files = list.dirs(), compression = "gzip")
+  setwd(curr_dir)
+  on.exit()
+
   extracted <- extract_description(targz)
-  
+  testthat::expect_equal(test_description, extracted)
 })
