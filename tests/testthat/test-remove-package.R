@@ -1,6 +1,8 @@
 testthat::context("test-removal")
 
 testthat::test_that("individual package removal works as expected", {
+  skip_if(Sys.getenv('CRANIUM_TEST_PACKAGES_DIR') == '', 'CRANIUM_TEST_PACKAGES_DIR env variable is unset. No packages to test.')
+  
   # Since removal is destructive, create a separate repo.
   repo <- dummy_repo(bundles = SAMPLE_BUNDLES)
   url <- contrib.url(repo, type = "source")
@@ -11,8 +13,8 @@ testthat::test_that("individual package removal works as expected", {
 
   # Remove two packages.
   PKGS <- SAMPLE_BUNDLES[1:2]
-  NAME <- sub("^([^_]+)_([^_]+)\\.tar\\.gz$", "\\1", basename(PKGS))
-  VERSION <- sub("^([^_]+)_([^_]+)\\.tar\\.gz$", "\\2", basename(PKGS))
+  NAME <- sub(regex_package_tar, "\\1", basename(PKGS))
+  VERSION <- sub(regex_package_tar, "\\2", basename(PKGS))
 
   removed <- remove_pkg(NAME, VERSION, repo = repo)
 
