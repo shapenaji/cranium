@@ -41,39 +41,23 @@ repository <- function(path) {
 #' @export
 summary.cranium_repository <- function(object, ...) {
   out <- list(
-    path = object$path, name = NA, src_pkgs = 0L, has_archive = FALSE,
-    has_meta = FALSE, win_binary_pkgs = 0L, macosx_binary_pkgs = 0L,
-    macos_binary_pkgs = 0L
+    path = object$path, name = NA, has_archive = FALSE, has_meta_dir = FALSE,
+    src_pkgs = 0L, win_binary_pkgs = integer(), mac_binary_pkgs = integer(),
+    mac_binary_el_capitan_pkgs = integer()
   )
+
+  # Handle source and binary packages differently.
   src_dir <- contrib.url(out$path, type = "source")
-  if (dir.exists(src_dir)) {
-    out$src_pkgs <- length(list.files(
-      src_dir, pattern = "^([a-zA-Z0-9\\.])+_([^_])+\\.tar\\.gz$"
-    ))
-    out$has_archive <- dir.exists(file.path(src_dir, "Archive"))
-    out$has_meta <- dir.exists(file.path(src_dir, "Meta"))
-  }
-  win_binary_dir <- contrib.url(out$path, type = "win.binary")
-  if (dir.exists(win_binary_dir)) {
-    out$win_binary_pkgs <- length(list.files(
-      win_binary_dir, pattern = "^([a-zA-Z0-9\\.])+_([^_])+\\.zip$",
-      recursive = TRUE
-    ))
-  }
-  macosx_binary_dir <- contrib.url(out$path, type = "mac.binary")
-  if (dir.exists(macosx_binary_dir)) {
-    out$macosx_binary_pkgs <- length(list.files(
-      macosx_binary_dir, pattern = "^([a-zA-Z0-9\\.])+_([^_])+\\.tgz$",
-      recursive = TRUE
-    ))
-  }
-  macos_binary_dir <- contrib.url(out$path, type = "mac.binary.el-capitan")
-  if (dir.exists(macos_binary_dir)) {
-    out$macos_binary_pkgs <- length(list.files(
-      macos_binary_dir, pattern = "^([a-zA-Z0-9\\.])+_([^_])+\\.tgz$",
-      recursive = TRUE
-    ))
-  }
+  out$src_pkgs <- length(list.files(src_dir, pattern = "\\.tar\\..*$"))
+  out$has_archive <- dir.exists(file.path(src_dir, "Archive"))
+  out$has_meta_dir <- dir.exists(file.path(src_dir, "Meta"))
+
+  out$win_binary_pkgs <- sapply(list_binary_pkg_files(out, "win.binary"), length)
+  out$mac_binary_pkgs <- sapply(list_binary_pkg_files(out, "mac.binary"), length)
+  out$mac_binary_el_capitan_pkgs <- sapply(
+    list_binary_pkg_files(out, "mac.binary.el-capitan"), length
+  )
+
   structure(out, class = "cranium_repository_summary")
 }
 
@@ -90,13 +74,39 @@ print.cranium_repository_summary <- function(x, ...) {
     sprintf("Repository: %s", x$name)
   }
   cat(
-    header, "\n",
-    "Source packages: ", x$src_pkgs, "\n",
-    "Has archive: ", if (x$has_archive) "yes" else "no", "\n",
-    "Has metadata: ", if (x$has_meta) "yes" else "no", "\n",
-    "Windows binary packages: ", x$win_binary_pkgs, "\n",
-    "MacOS binary packages: ", x$macos_binary_pkgs, "\n",
-    "Mac OSX binary packages: ", x$macosx_binary_pkgs, "\n",
+    header, "\n\n",
+    "Source Packages\n  Available: ", x$src_pkgs, "\n",
+    "  Has archive: ", if (x$has_archive) "yes" else "no", "\n",
+    "  Has meta directory: ", if (x$has_meta) "yes" else "no", "\n",
     sep = ""
   )
+  if (length(x$win_binary_pkgs) > 0) {
+    cat("\nWindows Binary Packages\n", paste0(
+      "  Available for R ", names(x$win_binary_pkgs), ": ", x$win_binary_pkgs,
+      collapse = "\n"
+    ), "\n", sep = "")
+  }
+  if (length(x$mac_binary_el_capitan_pkgs) > 0) {
+    cat("\nMacOS (El Capitan and Later) Binary Packages\n", paste0(
+      "  Available for R ", names(x$mac_binary_el_capitan_pkgs), ": ",
+      x$mac_binary_el_capitan_pkgs, collapse = "\n"
+    ), "\n", sep = "")
+  }
+  if (length(x$mac_binary_pkgs) > 0) {
+    cat("\nMacOS (Prior to El Capitan) Binary Packages\n", paste0(
+      "  Available for R ", names(x$mac_binary_pkgs), ": ", x$mac_binary_pkgs,
+      collapse = "\n"
+    ), "\n", sep = "")
+  }
+}
+
+list_binary_pkg_files <- function(repo, type) {
+  stopifnot(type %in% c("win.binary", "mac.binary", "mac.binary.el-capitan"))
+  ext <- switch(type, "win.binary" = "\\.zip$", "\\.tgz$")
+  bin_dirs <- list.files(
+    file.path(contrib.url(repo$path, type = type), ".."), full.names = TRUE
+  )
+  out <- lapply(bin_dirs, list.files, pattern = ext)
+  names(out) <- basename(bin_dirs)
+  out
 }
