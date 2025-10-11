@@ -1,3 +1,15 @@
+regex_package_tar <- "^([^_]+)_([^_]+)\\.tar\\.gz$"
+
+# Set this to a real list of files to run the tests.
+SAMPLE_BUNDLES <- 
+  list.files(Sys.getenv('CRANIUM_TEST_PACKAGES_DIR', unset = tempdir()),
+             full.names = TRUE)
+
+
+if (length(SAMPLE_BUNDLES) == 0) {
+  stop("Point 'SAMPLE_BUNDLES' towards package tarballs to run the tests.")
+}
+
 #' Create a Dummy Package Repository
 #'
 #' @param bundles A list of package tarballs to copy into the repository.
@@ -29,9 +41,5 @@ available <- function(repo, type = "source") {
   nrow(utils::available.packages(repos = paste0("file://", repo), type = type))
 }
 
-# Set this to a real list of files to run the tests.
-SAMPLE_BUNDLES <- character(0)
-
-if (length(SAMPLE_BUNDLES) == 0) {
-  stop("Point 'SAMPLE_BUNDLES' towards package tarballs to run the tests.")
-}
+# Initialize TEST_REPO for running all test scripts
+TEST_REPO <- dummy_repo(list.files(SAMPLE_BUNDLES, full.names = TRUE))
