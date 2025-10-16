@@ -2,20 +2,22 @@
 % Please edit documentation in R/descriptions.R
 \name{modify_description}
 \alias{modify_description}
-\title{Modify description of a single zipped package}
+\title{Modify the \code{DESCRIPTION} of a Built Package}
 \usage{
 modify_description(field, value, file)
 }
 \arguments{
-\item{field}{example: Repository}
+\item{field}{A vector of \code{DESCRIPTION} file fields, e.g.
+\code{"Repository"}.}
 
-\item{value}{example: internal}
+\item{value}{A vector of string values these fields should take.}
 
-\item{file}{example: /path/to/cranium_0.3.0.tar.gz}
+\item{file}{A package bundle, e.g. \code{"cranium_1.0.0.tar.gz"}.}
 }
 \value{
-A new available packages table
+\code{TRUE} if the bundle was modified correctly and \code{FALSE} otherwise.
 }
 \description{
-Modify description of a single zipped package
+This function allows you to modify package metadata inside of an existing
+package bundle. Some effort is made to do this as efficiently as possible.
 }
